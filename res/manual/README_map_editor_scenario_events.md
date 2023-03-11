@@ -175,8 +175,8 @@ Here is a list of available conditions that can be used.
 ### Population: Unemployment
 + type = population_unemployed
 + percentage = Should the check do a percentage check? Allowed values: "false" or "true".
-- "false" will compare total unemployed people to value given.
-- "true" will compare % (0 to 100) of unemployed people as % of total population to value given.
+  - "false" will compare total unemployed people to value given.
+  - "true" will compare % (0 to 100) of unemployed people as % of total population to value given.
 + check = What sort of check are we doing. Allowed values: "eq", "gte", "lte".
 + value = The amount to check for. Allowed values: Any number from 0 to 100.
 
@@ -261,7 +261,7 @@ Here is a list of available conditions that can be used.
 ### City health
 + type = city_health
 + min = The minimum amount to adjust the city health by. Allowed values: -100 to 100.
-+ max = The maximum amount to adjust the city health by. Allowed values: -100 to 100. Must be larger than 'min'.
++ max = The maximum amount to adjust the city health by. Allowed values: -100 to 100. Must be larger than or equal to 'min'.
 + set_to_value = Should we set the city health to the given value, instead of adding it? Allowed values: "false" or "true".
   - "true" = City health will just be set to what is provided.
   - "false" = Number will be added to the current city health.
@@ -294,7 +294,7 @@ Here is a list of available conditions that can be used.
 ### Money
 + type = money
 + min = The minimum amount to adjust money by. Allowed values: -10000000 to 10000000. (Negative values remove money.)
-+ max = The maximum amount to adjust money by. Allowed values: -10000000 to 10000000. Must be larger than 'min'.
++ max = The maximum amount to adjust money by. Allowed values: -10000000 to 10000000. Must be larger than or equal to 'min'.
 
 
 ### Resource produced / available locally
@@ -327,7 +327,7 @@ Here is a list of available conditions that can be used.
   - Note: Rome's wages can never drop below 1.
   - Note: If you use this, you probably want to not make use of the scenario's random events for adjusting wages, as the they will likely 'fight' one another.
 + min = The minimum amount to adjust Rome's wages by. Allowed values: -10000 to 10000.
-+ max = The maximum amount to adjust Rome's wages by. Allowed values: -10000 to 10000. Must be larger than 'min'.
++ max = The maximum amount to adjust Rome's wages by. Allowed values: -10000 to 10000. Must be larger than or equal to 'min'.
 + set_to_value = Should we set the wages to the given value, instead of adding it? Allowed values: "false" or "true".
   - "true" = Rome's wages will just be set to what is provided.
 
@@ -335,7 +335,7 @@ Here is a list of available conditions that can be used.
 ### Savings
 + type = savings
 + min = The minimum amount to adjust savings by. Allowed values: -10000000 to 10000000. (Negative values remove savings.)
-+ max = The maximum amount to adjust savings by. Allowed values: -10000000 to 10000000. Must be larger than 'min'.
++ max = The maximum amount to adjust savings by. Allowed values: -10000000 to 10000000. Must be larger than or equal to 'min'.
 
 
 ### Send standard message
