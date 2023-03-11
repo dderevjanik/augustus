@@ -1,0 +1,8 @@
+#ifndef ACTION_TYPE_REQUEST_IMMEDIATELY_START_H
+#define ACTION_TYPE_REQUEST_IMMEDIATELY_START_H
+
+#include "scenario/scenario_event_data.h"
+
+int scenario_event_action_request_immediately_start_execute(scenario_action_t *action);
+
+#endif // ACTION_TYPE_REQUEST_IMMEDIATELY_START_H
