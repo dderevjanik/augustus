@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define XML_TOTAL_ELEMENTS 4
+#define XML_TOTAL_ELEMENTS 36
 #define XML_EXPORT_MAX_SIZE 5000000
 
 static struct {
@@ -36,8 +36,8 @@ static struct {
 
 static int xml_import_start_scenario_events(void);
 static int xml_import_start_event(void);
-static int xml_import_start_condition(void);
-static int xml_import_start_action(void);
+static int xml_import_create_condition(void);
+static int xml_import_create_action(void);
 static void xml_import_log_error(const char *msg);
 
 static special_attribute_mapping_t *scenario_events_get_attribute_mapping(
@@ -58,14 +58,49 @@ static int xml_import_special_parse_resource(xml_data_attribute_t *attr, int *ta
 static int xml_import_special_parse_route(xml_data_attribute_t *attr, int *target);
 static int xml_import_special_parse_standard_message(xml_data_attribute_t *attr, int *target);
 
+static condition_types get_condition_type_from_element_name(const char *name);
+static action_types get_action_type_from_element_name(const char *name);
+
 static int condition_populate_parameters(scenario_condition_t *condition);
 static int action_populate_parameters(scenario_action_t *action);
 
 static const xml_parser_element xml_elements[XML_TOTAL_ELEMENTS] = {
     { "events", xml_import_start_scenario_events },
     { "event", xml_import_start_event, 0, "events" },
-    { "condition", xml_import_start_condition, 0, "event" },
-    { "action", xml_import_start_action, 0, "event" },
+    { "conditions", 0, 0, "event" },
+    { "actions", 0, 0, "event" },
+    { "time", xml_import_create_condition, 0, "conditions" },
+    { "difficulty", xml_import_create_condition, 0, "conditions" },
+    { "money", xml_import_create_condition, 0, "conditions" },
+    { "savings", xml_import_create_condition, 0, "conditions" },
+    { "stats_favor", xml_import_create_condition, 0, "conditions" },
+    { "stats_prosperity", xml_import_create_condition, 0, "conditions" }, //10
+    { "stats_culture", xml_import_create_condition, 0, "conditions" },
+    { "stats_peace", xml_import_create_condition, 0, "conditions" },
+    { "trade_sell_price", xml_import_create_condition, 0, "conditions" },
+    { "population_unemployed", xml_import_create_condition, 0, "conditions" },
+    { "rome_wages", xml_import_create_condition, 0, "conditions|actions" },
+    { "city_population", xml_import_create_condition, 0, "conditions" },
+    { "building_count_active", xml_import_create_condition, 0, "conditions" },
+    { "stats_health", xml_import_create_condition, 0, "conditions" },
+    { "count_own_troops", xml_import_create_condition, 0, "conditions" },
+    { "request_is_ongoing", xml_import_create_condition, 0, "conditions" }, //20
+    { "favor_add", xml_import_create_action, 0, "actions" },
+    { "money_add", xml_import_create_action, 0, "actions" },
+    { "savings_add", xml_import_create_action, 0, "actions" },
+    { "trade_price_adjust", xml_import_create_action, 0, "actions" },
+    { "trade_problems_land", xml_import_create_action, 0, "actions" },
+    { "trade_problems_sea", xml_import_create_action, 0, "actions" },
+    { "trade_route_amount", xml_import_create_action, 0, "actions" },
+    { "change_rome_wages", xml_import_create_action, 0, "actions" },
+    { "gladiator_revolt", xml_import_create_action, 0, "actions" },
+    { "change_resource_produced", xml_import_create_action, 0, "actions" }, //30
+    { "change_allowed_buildings", xml_import_create_action, 0, "actions" },
+    { "send_standard_message", xml_import_create_action, 0, "actions" },
+    { "city_health", xml_import_create_action, 0, "actions" },
+    { "trade_price_set", xml_import_create_action, 0, "actions" },
+    { "empire_map_convert_future_trade_city", xml_import_create_action, 0, "actions" },
+    { "request_immediately_start", xml_import_create_action, 0, "actions" },
 };
 
 static int xml_import_start_scenario_events(void)
@@ -107,15 +142,11 @@ scenario_condition_data_t *scenario_conditions_get_xml_attributes(condition_type
     return &scenario_condition_data[type];
 }
 
-static condition_types get_condition_type_from_attr(const char *key)
+static condition_types get_condition_type_from_element_name(const char *name)
 {
-    const char *value = xml_parser_get_attribute_string(key);
-    if (!value) {
-        return CONDITION_TYPE_UNDEFINED;
-    }
     for (condition_types i = CONDITION_TYPE_MIN; i < CONDITION_TYPE_MAX; i++) {
         const char *condition_name = scenario_conditions_get_xml_attributes(i)->xml_attr.name;
-        if (xml_parser_compare_multiple(condition_name, value)) {
+        if (xml_parser_compare_multiple(condition_name, name)) {
             return i;
         }
     }
@@ -135,17 +166,14 @@ static int condition_populate_parameters(scenario_condition_t *condition)
     return success;
 }
 
-static int xml_import_start_condition(void)
+static int xml_import_create_condition(void)
 {
     if (!data.success) {
         return 0;
     }
-    
-    if (!xml_parser_has_attribute("type")) {
-        log_info("No condition type specified", 0, 0);
-        return 0;
-    }
-    condition_types type = get_condition_type_from_attr("type");
+
+    const char *name = xml_parser_get_current_element_name();
+    condition_types type = get_condition_type_from_element_name(name);
     if (type == CONDITION_TYPE_UNDEFINED) {
         log_info("Invalid condition type specified", 0, 0);
         return 0;
@@ -160,15 +188,11 @@ scenario_action_data_t *scenario_actions_get_xml_attributes(action_types type)
     return &scenario_action_data[type];
 }
 
-static action_types get_action_type_from_attr(const char *key)
+static action_types get_action_type_from_element_name(const char *name)
 {
-    const char *value = xml_parser_get_attribute_string(key);
-    if (!value) {
-        return ACTION_TYPE_UNDEFINED;
-    }
     for (action_types i = ACTION_TYPE_MIN; i < ACTION_TYPE_MAX; i++) {
         const char *action_name = scenario_actions_get_xml_attributes(i)->xml_attr.name;
-        if (xml_parser_compare_multiple(action_name, value)) {
+        if (xml_parser_compare_multiple(action_name, name)) {
             return i;
         }
     }
@@ -188,18 +212,14 @@ static int action_populate_parameters(scenario_action_t *action)
     return success;
 }
 
-static int xml_import_start_action(void)
+static int xml_import_create_action(void)
 {
     if (!data.success) {
         return 0;
     }
-    
-    if (!xml_parser_has_attribute("type")) {
-        xml_import_log_error("No action type specified");
-        log_info("No action type specified", 0, 0);
-        return 0;
-    }
-    action_types type = get_action_type_from_attr("type");
+
+    const char *name = xml_parser_get_current_element_name();
+    action_types type = get_action_type_from_element_name(name);
     if (type == ACTION_TYPE_UNDEFINED) {
         xml_import_log_error("Invalid action type specified");
         log_info("Invalid action type specified", 0, 0);

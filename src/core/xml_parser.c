@@ -357,6 +357,11 @@ int xml_parser_get_current_line_number(void)
     return XML_GetCurrentLineNumber(data.parser);
 }
 
+const char *xml_parser_get_current_element_name()
+{
+    return data.current_element->name;
+}
+
 void xml_parser_reset(void)
 {
     data.error = 0;

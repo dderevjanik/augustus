@@ -24,41 +24,65 @@
 <events version="1">
     <!-- First request (id = 0) -->
     <event repeat_months_min="12" repeat_months_max="12"> <!-- At most once per year -->
-        <condition type="time" check="gte" amount="24"/> <!-- 2 years -->
-        <condition type="time" check="lte" amount="120"/> <!-- 10 years -->
-        <condition type="request_is_ongoing" request_id="0" check_for_ongoing="false"/> <!-- Only start this if it isn't currently ongoing -->
-        <action type="request_immediately_start" request_id="0"/>
+        <conditions>
+            <time check="gte" amount="24"/> <!-- 2 years -->
+            <time check="lte" amount="120"/> <!-- 10 years -->
+            <request_is_ongoing request_id="0" check_for_ongoing="false"/> <!-- Only start this if it isn't currently ongoing -->
+        </conditions>
+        <actions>
+            <request_immediately_start request_id="0"/>
+        </actions>
     </event>
     <!-- Second request (id = 1) -->
     <event repeat_months_min="1" repeat_months_max="1">  <!-- Immediately repeated upon completion / ignored -->
-        <condition type="time" check="gte" amount="120"/> <!-- 10 years -->
-        <condition type="request_is_ongoing" request_id="1" check_for_ongoing="false"/>
-        <action type="request_immediately_start" request_id="1"/>
+        <conditions>
+            <time check="gte" amount="120"/> <!-- 10 years -->
+            <request_is_ongoing request_id="1" check_for_ongoing="false"/>
+        </conditions>
+        <actions>
+            <request_immediately_start request_id="1"/>
+        </actions>
     </event>
     <!-- Third request (id = 2) -->
     <event repeat_months_min="1" repeat_months_max="1">  <!-- Immediately repeated upon completion / ignored -->
-        <condition type="time" check="gte" amount="144"/> <!-- 12 years -->
-        <condition type="request_is_ongoing" request_id="2" check_for_ongoing="false"/>
-        <action type="request_immediately_start" request_id="2"/>
+        <conditions>
+        </conditions>
+        <actions>
+        </actions>
+        <time check="gte" amount="144"/> <!-- 12 years -->
+        <request_is_ongoing request_id="2" check_for_ongoing="false"/>
+        <request_immediately_start request_id="2"/>
     </event>
     <!-- Fourth request (id = 3) -->
     <event repeat_months_min="8" repeat_months_max="12">  <!-- Random, roughly 10 months -->
-        <condition type="time" check="gte" amount="144"/>
-        <condition type="request_is_ongoing" request_id="3" check_for_ongoing="false"/>
-        <action type="request_immediately_start" request_id="3"/>
+        <conditions>
+            <time check="gte" amount="144"/>
+            <request_is_ongoing request_id="3" check_for_ongoing="false"/>
+        </conditions>
+        <actions>
+            <request_immediately_start request_id="3"/>
+        </actions>
     </event>
     <!-- Fifth request (id = 4) -->
     <event repeat_months_min="8" repeat_months_max="12">  <!-- Random, roughly 10 months -->
-        <condition type="time" check="gte" amount="144"/>
-        <condition type="request_is_ongoing" request_id="4" check_for_ongoing="false"/>
-        <action type="request_immediately_start" request_id="4"/>
+        <conditions>
+            <time check="gte" amount="144"/>
+            <request_is_ongoing request_id="4" check_for_ongoing="false"/>
+        </conditions>
+        <actions>
+            <request_immediately_start request_id="4"/>
+        </actions>
     </event>
     <!-- Make it harder to keep Caesar's favour high (basically we counter gifts, of which a lavish gift can grant 10 favour per year without penalty).
         This way the player has to make use of the repeatng requests to get to the target of 95 favour.
         If fact, since the player will lose 1 favour per month, they will have to be constantly fulfilling multiple repeating requests to
         get to the target favor -->
     <event repeat_months_min="1" repeat_months_max="1"> <!-- Every month... -->
-        <condition type="stats_favor" check="gte" value="40"/> <!-- when Caesar's favour is above 40, then... -->
-        <action type="favor_add" amount="-1"/> <!-- drop Caesar's favor by 1. -->
+        <conditions>
+            <stats_favor check="gte" value="40"/> <!-- when Caesar's favour is above 40, then... -->
+        </conditions>
+        <actions>
+            <favor_add amount="-1"/> <!-- drop Caesar's favor by 1. -->
+        </actions>
     </event>
 </events>

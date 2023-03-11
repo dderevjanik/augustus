@@ -72,18 +72,6 @@ If there are already events in the map, you'll see a list of the events and how 
 ## How often are events checked and ran?
 
 Every time the month ticks over (changes to the next month).
-This is done for 2 reasons.
-1. Most checks only make sense on a monthly basis since a lot of the statistics and values only get updated once a month.
-2. To avoid potential lag, since you can have any number of events, with any number of conditions each. Not something we want to check through all the time.
-
-
-## Can events cause lag?
-
-Highly unlikely.
-The game keeps track of which events are done and dusted (i.e. can never fire again) and doesn't even bother checking them.
-For the rest, it only checks once a month.
-
-But people are creative. I'm sure someone will find a way.
 
 
 ## Event settings
@@ -323,7 +311,7 @@ Here is a list of available conditions that can be used.
 
 
 ### Rome wages
-+ type = rome_wages
++ type = change_rome_wages
   - Note: Rome's wages can never drop below 1.
   - Note: If you use this, you probably want to not make use of the scenario's random events for adjusting wages, as the they will likely 'fight' one another.
 + min = The minimum amount to adjust Rome's wages by. Allowed values: -10000 to 10000.
