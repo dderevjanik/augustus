@@ -14,8 +14,8 @@
             <time check="gte" min="4" max="6"/>
         </conditions>
         <actions>
-            <!-- Give the playre 1000 money -->
-            <money_add min="1000" max="1000"/>
+            <!-- Give the player 1000 money -->
+            <money_add amount="1000"/>
             <!-- Give the player 1 favor -->
             <favor_add amount="1"/>
         </actions>
