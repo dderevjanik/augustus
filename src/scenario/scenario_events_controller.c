@@ -2,8 +2,8 @@
 
 #include "core/log.h"
 #include "game/save_version.h"
-#include "scenario/actiontype/action_types.h"
-#include "scenario/conditiontype/condition_types.h"
+#include "scenario/action_types/action_handler.h"
+#include "scenario/condition_types/condition_handler.h"
 #include "scenario/scenario.h"
 #include "scenario/scenario_event.h"
 
@@ -109,7 +109,7 @@ static void scenario_events_conditions_save_state(buffer *buf)
 
         for (int j = 0; j < current_event->conditions.size; j++) {
             scenario_condition_t *current = array_item(current_event->conditions, j);
-            scenario_condition_save_state(buf, current, LINK_TYPE_SCENARIO_EVENT, current_event->id);
+            scenario_condition_type_save_state(buf, current, LINK_TYPE_SCENARIO_EVENT, current_event->id);
         }
     }
 }
@@ -134,7 +134,7 @@ static void scenario_events_actions_save_state(buffer *buf)
 
         for (int j = 0; j < current_event->actions.size; j++) {
             scenario_action_t *current = array_item(current_event->actions, j);
-            scenario_action_save_state(buf, current, LINK_TYPE_SCENARIO_EVENT, current_event->id);
+            scenario_action_type_save_state(buf, current, LINK_TYPE_SCENARIO_EVENT, current_event->id);
         }
     }
 }
@@ -191,7 +191,7 @@ static void scenario_conditions_load_state(buffer *buf)
     int32_t link_id = 0;
     for (int i = 0; i < array_size; i++) {
         scenario_condition_t condition;
-        scenario_condition_load_state(buf, version, &condition, &link_type, &link_id);
+        scenario_condition_type_load_state(buf, version, &condition, &link_type, &link_id);
         scenario_load_link_condition(&condition, link_type, link_id);
     }
 }
@@ -224,7 +224,7 @@ static void scenario_actions_load_state(buffer *buf)
     int32_t link_id = 0;
     for (int i = 0; i < array_size; i++) {
         scenario_action_t action;
-        scenario_action_load_state(buf, version, &action, &link_type, &link_id);
+        scenario_action_type_load_state(buf, version, &action, &link_type, &link_id);
         scenario_load_link_action(&action, link_type, link_id);
     }
 }

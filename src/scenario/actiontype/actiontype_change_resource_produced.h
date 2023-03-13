@@ -1,8 +1,0 @@
-#ifndef ACTION_TYPE_CHANGE_RESOURCE_PRODUCED_H
-#define ACTION_TYPE_CHANGE_RESOURCE_PRODUCED_H
-
-#include "scenario/scenario_event_data.h"
-
-int scenario_event_action_change_resource_produced_execute(scenario_action_t *action);
-
-#endif // ACTION_TYPE_CHANGE_RESOURCE_PRODUCED_H

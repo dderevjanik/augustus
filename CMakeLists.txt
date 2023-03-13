@@ -507,41 +507,41 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/scenario_events_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/scenario_event.c
     ${PROJECT_SOURCE_DIR}/src/scenario/scenario_events_controller.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/action_types.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_change_allowed_buildings.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_change_resource_produced.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_city_health.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_favor.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_empire_map_convert_future_trade_city.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_gladiator_revolt.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_money.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_request_immediately_start.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_rome_wages.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_savings.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_send_standard_message.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_trade_price.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_trade_problem_land.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_trade_problem_sea.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_trade_route_amount.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/actiontype/actiontype_trade_price_set.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/comparison_helper.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/condition_types.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_building_count_active.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_city_population.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_count_own_troops.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_difficulty.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_money.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_population_unemployed.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_request_is_ongoing.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_rome_wages.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_savings.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_stats_favor.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_stats_city_health.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_stats_culture.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_stats_peace.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_stats_prosperity.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_time.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/conditiontype/conditiontype_trade_sell_price.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/action_handler.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/change_allowed_buildings.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/change_resource_produced.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/city_health.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/favor.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/empire_map_convert_future_trade_city.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/gladiator_revolt.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/money.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/request_immediately_start.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/rome_wages.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/savings.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/send_standard_message.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/trade_price.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/trade_problem_land.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/trade_problem_sea.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/trade_route_amount.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/action_types/trade_price_set.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/comparison_helper.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/condition_handler.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/building_count_active.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/city_population.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/count_own_troops.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/difficulty.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/money.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/population_unemployed.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/request_is_ongoing.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/rome_wages.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/savings.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/stats_favor.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/stats_city_health.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/stats_culture.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/stats_peace.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/stats_prosperity.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/time.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/condition_types/trade_sell_price.c
 )
 set(GRAPHICS_FILES
     ${PROJECT_SOURCE_DIR}/src/graphics/arrow_button.c

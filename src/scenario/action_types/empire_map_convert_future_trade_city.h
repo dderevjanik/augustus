@@ -1,0 +1,8 @@
+#ifndef ACTION_TYPE_EMPIRE_MAP_CONVERT_FUTURE_TRADE_CITY_H
+#define ACTION_TYPE_EMPIRE_MAP_CONVERT_FUTURE_TRADE_CITY_H
+
+#include "scenario/scenario_event_data.h"
+
+int scenario_action_type_empire_map_convert_future_trade_city_execute(scenario_action_t *action);
+
+#endif // ACTION_TYPE_EMPIRE_MAP_CONVERT_FUTURE_TRADE_CITY_H

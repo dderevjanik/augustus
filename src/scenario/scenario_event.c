@@ -2,8 +2,8 @@
 
 #include "core/log.h"
 #include "core/random.h"
-#include "scenario/actiontype/action_types.h"
-#include "scenario/conditiontype/condition_types.h"
+#include "scenario/action_types/action_handler.h"
+#include "scenario/condition_types/condition_handler.h"
 
 static int condition_in_use(const scenario_condition_t *condition);
 static int action_in_use(const scenario_action_t *action);
@@ -12,11 +12,11 @@ void scenario_event_init(scenario_event_t *event)
 {
     for (int i = 0; i < event->conditions.size; i++) {
         scenario_condition_t *current = array_item(event->conditions, i);
-        scenario_condition_init(current);
+        scenario_condition_type_init(current);
     }
     for (int i = 0; i < event->actions.size; i++) {
         scenario_action_t *current = array_item(event->actions, i);
-        scenario_action_init(current);
+        scenario_action_type_init(current);
     }
 }
 
@@ -154,7 +154,7 @@ int scenario_event_all_conditions_met(scenario_event_t *event)
     
     for (int i = 0; i < event->conditions.size; i++) {
         scenario_condition_t *current = array_item(event->conditions, i);
-        if (scenario_condition_is_met(current) == 0) {
+        if (scenario_condition_type_is_met(current) == 0) {
             return 0;
         }
     }
@@ -204,7 +204,7 @@ int scenario_event_execute(scenario_event_t *event)
 
     for (int i = 0; i < event->actions.size; i++) {
         scenario_action_t *current = array_item(event->actions, i);
-        int action_result = scenario_action_execute(current);
+        int action_result = scenario_action_type_execute(current);
         actioned &= action_result;
     }
 
