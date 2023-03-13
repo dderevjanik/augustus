@@ -1,0 +1,329 @@
+#include "scenario_events_export_xml.h"
+
+#include "core/buffer.h"
+#include "core/io.h"
+#include "core/log.h"
+#include "core/string.h"
+#include "core/xml_exporter.h"
+#include "empire/city.h"
+#include "scenario/scenario_events_controller.h"
+#include "scenario/scenario_events_parameter_data.h"
+#include "window/plain_message_dialog.h"
+
+#include <string.h>
+
+#define XML_EXPORT_MAX_SIZE 5000000
+
+static struct {
+    int success;
+    char error_message[200];
+} data;
+
+static void xml_exporter_scenario_events(buffer *buf);
+static void xml_exporter_event_condition(scenario_condition_t *condition);
+static void xml_exporter_event_action(scenario_action_t *action);
+
+static void xml_exporter_log_error(const char *msg);
+
+static int xml_exporter_parse_attribute(xml_data_attribute_t *attr, int target);
+static int xml_exporter_attribute_allowed_building(xml_data_attribute_t *attr, int target);
+static int xml_exporter_attribute_boolean(xml_data_attribute_t *attr, int target);
+static int xml_exporter_attribute_building(xml_data_attribute_t *attr, int target);
+static int xml_exporter_attribute_check(xml_data_attribute_t *attr, int target);
+static int xml_exporter_attribute_difficulty(xml_data_attribute_t *attr, int target);
+static int xml_exporter_attribute_future_city(xml_data_attribute_t *attr, int target);
+static int xml_exporter_attribute_number(xml_data_attribute_t *attr, int target);
+static int xml_exporter_attribute_pop_class(xml_data_attribute_t *attr, int target);
+static int xml_exporter_attribute_resource(xml_data_attribute_t *attr, int target);
+static int xml_exporter_attribute_route(xml_data_attribute_t *attr, int target);
+static int xml_exporter_attribute_standard_message(xml_data_attribute_t *attr, int target);
+
+static special_attribute_mapping_t *xml_exporter_get_attribute_mapping(
+    int target, special_attribute_mapping_t array[], int array_size);
+
+static void xml_exporter_log_error(const char *msg)
+{
+    data.success = 0;
+    strcpy(data.error_message, msg);
+    log_error("Error while exporting scenario events to XML. ", data.error_message, 0);
+
+    window_plain_message_dialog_show_with_extra(
+        TR_EDITOR_UNABLE_TO_SAVE_EVENTS_TITLE, TR_EDITOR_CHECK_LOG_MESSAGE,
+        string_from_ascii(data.error_message));
+}
+
+#pragma region ATTRIBUTE_PARSING
+
+
+static int xml_exporter_parse_attribute(xml_data_attribute_t *attr, int target)
+{
+    switch (attr->type) {
+        case PARAMETER_TYPE_ALLOWED_BUILDING: return xml_exporter_attribute_allowed_building(attr, target);
+        case PARAMETER_TYPE_BOOLEAN: return xml_exporter_attribute_boolean(attr, target);
+        case PARAMETER_TYPE_BUILDING: return xml_exporter_attribute_building(attr, target);
+        case PARAMETER_TYPE_BUILDING_COUNTING: return xml_exporter_attribute_building(attr, target);
+        case PARAMETER_TYPE_CHECK: return xml_exporter_attribute_check(attr, target);
+        case PARAMETER_TYPE_DIFFICULTY: return xml_exporter_attribute_difficulty(attr, target);
+        case PARAMETER_TYPE_FUTURE_CITY: return xml_exporter_attribute_future_city(attr, target);
+        case PARAMETER_TYPE_MIN_MAX_NUMBER: return xml_exporter_attribute_number(attr, target);
+        case PARAMETER_TYPE_NUMBER: return xml_exporter_attribute_number(attr, target);
+        case PARAMETER_TYPE_POP_CLASS: return xml_exporter_attribute_pop_class(attr, target);
+        case PARAMETER_TYPE_RESOURCE: return xml_exporter_attribute_resource(attr, target);
+        case PARAMETER_TYPE_ROUTE: return xml_exporter_attribute_route(attr, target);
+        case PARAMETER_TYPE_STANDARD_MESSAGE: return xml_exporter_attribute_standard_message(attr, target);
+        case PARAMETER_TYPE_UNDEFINED:
+            return 1;
+        default:
+            xml_exporter_log_error("Something is very wrong. Failed to find attribute type.");
+            return 0;
+    }
+}
+
+static special_attribute_mapping_t *xml_exporter_get_attribute_mapping(int target, special_attribute_mapping_t array[], int array_size)
+{
+    for (int i = 0; i < array_size; i++) {
+        special_attribute_mapping_t *current = &array[i];
+        if (target == current->value) {
+            return current;
+        }
+    }
+    return 0;
+}
+
+static int xml_exporter_attribute_boolean(xml_data_attribute_t *attr, int target)
+{
+    for (int i = 0; i < SPECIAL_ATTRIBUTE_MAPPINGS_BOOLEAN_SIZE; i++) {
+        special_attribute_mapping_t *current = &special_attribute_mappings_boolean[i];
+        if (target == current->value) {
+            xml_exporter_add_attribute_text(attr->name, string_from_ascii(current->text));
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static int xml_exporter_attribute_allowed_building(xml_data_attribute_t *attr, int target)
+{
+    for (int i = 0; i < SPECIAL_ATTRIBUTE_MAPPINGS_ALLOWED_BUILDINGS_SIZE; i++) {
+        special_attribute_mapping_t *current = &special_attribute_mappings_allowed_buildings[i];
+        if (target == current->value) {
+            xml_exporter_add_attribute_text(attr->name, string_from_ascii(current->text));
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static int xml_exporter_attribute_building(xml_data_attribute_t *attr, int target)
+{
+    special_attribute_mapping_t *found = xml_exporter_get_attribute_mapping(
+        target, special_attribute_mappings_buildings, BUILDING_TYPE_MAX);
+    if (found != 0) {
+        xml_exporter_add_attribute_text(attr->name, string_from_ascii(found->text));
+        return 1;
+    }
+    return 0;
+}
+
+static int xml_exporter_attribute_check(xml_data_attribute_t *attr, int target)
+{
+    for (int i = 0; i < SPECIAL_ATTRIBUTE_MAPPINGS_CHECK_SIZE; i++) {
+        special_attribute_mapping_t *current = &special_attribute_mappings_check[i];
+        if (target == current->value) {
+            xml_exporter_add_attribute_text(attr->name, string_from_ascii(current->text));
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static int xml_exporter_attribute_difficulty(xml_data_attribute_t *attr, int target)
+{
+    for (int i = 0; i < SPECIAL_ATTRIBUTE_MAPPINGS_CHECK_DIFFICULTY; i++) {
+        special_attribute_mapping_t *current = &special_attribute_mappings_difficulty[i];
+        if (target == current->value) {
+            xml_exporter_add_attribute_text(attr->name, string_from_ascii(current->text));
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static int xml_exporter_attribute_future_city(xml_data_attribute_t *attr, int target)
+{
+    empire_city *city = empire_city_get(target);
+    if (city) {
+        const uint8_t *city_name = empire_city_get_name(city);
+        xml_exporter_add_attribute_text(attr->name, city_name);
+        return 1;
+    }
+    return 0;
+}
+
+static int xml_exporter_attribute_number(xml_data_attribute_t *attr, int target)
+{
+    xml_exporter_add_attribute_int(attr->name, target);
+    return 1;
+}
+
+static int xml_exporter_attribute_pop_class(xml_data_attribute_t *attr, int target)
+{
+    for (int i = 0; i < SPECIAL_ATTRIBUTE_MAPPINGS_POP_CLASS_SIZE; i++) {
+        special_attribute_mapping_t *current = &special_attribute_mappings_pop_class[i];
+        if (target == current->value) {
+            xml_exporter_add_attribute_text(attr->name, string_from_ascii(current->text));
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static int xml_exporter_attribute_route(xml_data_attribute_t *attr, int target)
+{
+    int city_id = empire_city_get_for_trade_route(target);
+    if (city_id) {
+        empire_city *city = empire_city_get(city_id);
+        const uint8_t *city_name = empire_city_get_name(city);
+        xml_exporter_add_attribute_text(attr->name, city_name);
+        return 1;
+    }
+    return 0;
+}
+
+static int xml_exporter_attribute_resource(xml_data_attribute_t *attr, int target)
+{
+    const char *resource_name = resource_get_data(target)->xml_attr_name;
+    char resource_name_to_use[50] = " ";
+
+    const char *next = strchr(resource_name, '|');
+    size_t length = next ? (next - resource_name) : strlen(resource_name);
+    if (length > 48) {
+        length = 48;
+    }
+    strncpy(resource_name_to_use, resource_name, length);
+
+    xml_exporter_add_attribute_text(attr->name, string_from_ascii(resource_name_to_use));
+    return 1;
+}
+
+static int xml_exporter_attribute_standard_message(xml_data_attribute_t *attr, int target)
+{
+    for (int i = 0; i < SPECIAL_ATTRIBUTE_MAPPINGS_STANDARD_MESSAGE_SIZE; i++) {
+        special_attribute_mapping_t *current = &special_attribute_mappings_standard_message[i];
+        if (target == current->value) {
+            xml_exporter_add_attribute_text(attr->name, string_from_ascii(current->text));
+            return 1;
+        }
+    }
+    return 0;
+}
+
+#pragma endregion ATTRIBUTE_PARSING
+
+static void xml_exporter_event_condition(scenario_condition_t *condition)
+{
+    scenario_condition_data_t *data = scenario_events_parameter_data_get_conditions_xml_attributes(condition->type);
+    if (data->type == CONDITION_TYPE_UNDEFINED) {
+        return;
+    }
+
+    if (data->xml_attr.name) {
+        xml_exporter_new_element(data->xml_attr.name, 1);
+    } else {
+        xml_exporter_log_error("Error while exporting condition.");
+        return;
+    }
+
+    xml_exporter_parse_attribute(&data->xml_parm1, condition->parameter1);
+    xml_exporter_parse_attribute(&data->xml_parm2, condition->parameter2);
+    xml_exporter_parse_attribute(&data->xml_parm3, condition->parameter3);
+    xml_exporter_parse_attribute(&data->xml_parm4, condition->parameter4);
+    xml_exporter_parse_attribute(&data->xml_parm5, condition->parameter5);
+
+    xml_exporter_close_element();
+}
+
+static void xml_exporter_event_action(scenario_action_t *action)
+{
+    scenario_action_data_t *data = scenario_events_parameter_data_get_actions_xml_attributes(action->type);
+    if (data->type == ACTION_TYPE_UNDEFINED) {
+        return;
+    }
+
+    if (data->xml_attr.name) {
+        xml_exporter_new_element(data->xml_attr.name, 1);
+    } else {
+        xml_exporter_log_error("Error while exporting action.");
+        return;
+    }
+
+    xml_exporter_parse_attribute(&data->xml_parm1, action->parameter1);
+    xml_exporter_parse_attribute(&data->xml_parm2, action->parameter2);
+    xml_exporter_parse_attribute(&data->xml_parm3, action->parameter3);
+    xml_exporter_parse_attribute(&data->xml_parm4, action->parameter4);
+    xml_exporter_parse_attribute(&data->xml_parm5, action->parameter5);
+
+    xml_exporter_close_element();
+}
+
+static int xml_exporter_event(scenario_event_t *event)
+{
+    xml_exporter_new_element("event", 1);
+
+    if (event->repeat_months_min > 0) {
+        xml_exporter_add_attribute_int("repeat_months_min", event->repeat_months_min);
+    }
+    if (event->repeat_months_max > 0) {
+        xml_exporter_add_attribute_int("repeat_months_max", event->repeat_months_min);
+    }
+    if (event->max_number_of_repeats > 0) {
+        xml_exporter_add_attribute_int("max_number_of_repeats", event->repeat_months_min);
+    }
+
+
+    xml_exporter_new_element("conditions", 1);
+    for (int i = 0; i < event->conditions.size; i++) {
+        scenario_condition_t *condition = array_item(event->conditions, i);
+        xml_exporter_event_condition(condition);
+    }
+    xml_exporter_close_element();
+
+
+    xml_exporter_new_element("actions", 1);
+    for (int i = 0; i < event->actions.size; i++) {
+        scenario_action_t *action = array_item(event->actions, i);
+        xml_exporter_event_action(action);
+    }
+    xml_exporter_close_element();
+
+
+    xml_exporter_close_element();
+    
+    return 1;
+}
+
+static void xml_exporter_scenario_events(buffer *buf)
+{
+    xml_exporter_init(buf, "events");
+    xml_exporter_new_element("events", 0);
+    xml_exporter_add_attribute_int("version", SCENARIO_EVENTS_XML_VERSION);
+
+    int event_count = scenario_events_get_count();
+    for (int i = 0; i < event_count; i++) {
+        scenario_event_t *event = scenario_event_get(i);
+        xml_exporter_event(event);
+    }
+    xml_exporter_close_element();
+    xml_exporter_newline();
+}
+
+int scenario_events_export_to_xml(const char *filename)
+{
+    buffer buf;
+    int buf_size = XML_EXPORT_MAX_SIZE;
+    uint8_t *buf_data = malloc(buf_size);
+    buffer_init(&buf, buf_data, buf_size);
+    xml_exporter_scenario_events(&buf);
+    io_write_buffer_to_file(filename, buf.data, buf.index);
+    return 1;
+}

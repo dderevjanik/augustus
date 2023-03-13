@@ -1,4 +1,4 @@
-#include "scenario_events_xml.h"
+#include "scenario_events_import_xml.h"
 
 #include "assets/assets.h"
 #include "core/array.h"
@@ -17,13 +17,13 @@
 #include "scenario/scenario_event.h"
 #include "scenario/scenario_event_data.h"
 #include "scenario/scenario_events_controller.h"
+#include "scenario/scenario_events_parameter_data.h"
 #include "window/plain_message_dialog.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
 
 #define XML_TOTAL_ELEMENTS 36
-#define XML_EXPORT_MAX_SIZE 5000000
 
 static struct {
     int success;
@@ -137,15 +137,10 @@ static int xml_import_start_event(void)
     return 1;
 }
 
-scenario_condition_data_t *scenario_conditions_get_xml_attributes(condition_types type)
-{
-    return &scenario_condition_data[type];
-}
-
 static condition_types get_condition_type_from_element_name(const char *name)
 {
     for (condition_types i = CONDITION_TYPE_MIN; i < CONDITION_TYPE_MAX; i++) {
-        const char *condition_name = scenario_conditions_get_xml_attributes(i)->xml_attr.name;
+        const char *condition_name = scenario_events_parameter_data_get_conditions_xml_attributes(i)->xml_attr.name;
         if (xml_parser_compare_multiple(condition_name, name)) {
             return i;
         }
@@ -155,7 +150,7 @@ static condition_types get_condition_type_from_element_name(const char *name)
 
 static int condition_populate_parameters(scenario_condition_t *condition)
 {
-    scenario_condition_data_t *data = scenario_conditions_get_xml_attributes(condition->type);
+    scenario_condition_data_t *data = scenario_events_parameter_data_get_conditions_xml_attributes(condition->type);
     int success = 1;
     success &= xml_import_special_parse_attribute(&data->xml_parm1, &condition->parameter1);
     success &= xml_import_special_parse_attribute(&data->xml_parm2, &condition->parameter2);
@@ -183,15 +178,10 @@ static int xml_import_create_condition(void)
     return condition_populate_parameters(condition);
 }
 
-scenario_action_data_t *scenario_actions_get_xml_attributes(action_types type)
-{
-    return &scenario_action_data[type];
-}
-
 static action_types get_action_type_from_element_name(const char *name)
 {
     for (action_types i = ACTION_TYPE_MIN; i < ACTION_TYPE_MAX; i++) {
-        const char *action_name = scenario_actions_get_xml_attributes(i)->xml_attr.name;
+        const char *action_name = scenario_events_parameter_data_get_actions_xml_attributes(i)->xml_attr.name;
         if (xml_parser_compare_multiple(action_name, name)) {
             return i;
         }
@@ -201,7 +191,7 @@ static action_types get_action_type_from_element_name(const char *name)
 
 static int action_populate_parameters(scenario_action_t *action)
 {
-    scenario_action_data_t *data = scenario_actions_get_xml_attributes(action->type);
+    scenario_action_data_t *data = scenario_events_parameter_data_get_actions_xml_attributes(action->type);
     int success = 1;
     success &= xml_import_special_parse_attribute(&data->xml_parm1, &action->parameter1);
     success &= xml_import_special_parse_attribute(&data->xml_parm2, &action->parameter2);

@@ -10,7 +10,8 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
-#include "scenario/scenario_events_xml.h"
+#include "scenario/scenario_events_import_xml.h"
+#include "scenario/scenario_events_parameter_data.h"
 #include "window/editor/map.h"
 #include "window/numeric_input.h"
 
@@ -41,7 +42,7 @@ static struct {
 static void init(scenario_condition_t *condition)
 {
     data.condition = condition;
-    data.xml_info = scenario_conditions_get_xml_attributes(condition->type);
+    data.xml_info = scenario_events_parameter_data_get_conditions_xml_attributes(condition->type);
 }
 
 static void draw_background(void)

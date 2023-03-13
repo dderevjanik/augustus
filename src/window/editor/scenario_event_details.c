@@ -13,7 +13,8 @@
 #include "input/input.h"
 #include "scenario/scenario_event.h"
 #include "scenario/scenario_events_controller.h"
-#include "scenario/scenario_events_xml.h"
+#include "scenario/scenario_events_import_xml.h"
+#include "scenario/scenario_events_parameter_data.h"
 #include "window/editor/map.h"
 #include "window/editor/scenario_action_edit.h"
 #include "window/editor/scenario_condition_edit.h"
@@ -125,7 +126,7 @@ static void populate_list(int offset)
             entry.parameter4 = current->parameter4;
             entry.parameter5 = current->parameter5;
 
-            scenario_condition_data_t *xml_info = scenario_conditions_get_xml_attributes(current->type);
+            scenario_condition_data_t *xml_info = scenario_events_parameter_data_get_conditions_xml_attributes(current->type);
             entry.xml_attr_name = xml_info->xml_attr.name;
             entry.xml_parm1_name = xml_info->xml_parm1.name;
             entry.xml_parm2_name = xml_info->xml_parm2.name;
@@ -147,7 +148,7 @@ static void populate_list(int offset)
             entry.parameter4 = current->parameter4;
             entry.parameter5 = current->parameter5;
 
-            scenario_action_data_t *xml_info = scenario_actions_get_xml_attributes(current->type);
+            scenario_action_data_t *xml_info = scenario_events_parameter_data_get_actions_xml_attributes(current->type);
             entry.xml_attr_name = xml_info->xml_attr.name;
             entry.xml_parm1_name = xml_info->xml_parm1.name;
             entry.xml_parm2_name = xml_info->xml_parm2.name;

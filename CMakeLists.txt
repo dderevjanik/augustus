@@ -283,6 +283,7 @@ set(CORE_FILES
     ${PROJECT_SOURCE_DIR}/src/core/string.c
     ${PROJECT_SOURCE_DIR}/src/core/time.c
     ${PROJECT_SOURCE_DIR}/src/core/xml_parser.c
+    ${PROJECT_SOURCE_DIR}/src/core/xml_exporter.c
     ${PROJECT_SOURCE_DIR}/src/core/zip.c
     ${PROJECT_SOURCE_DIR}/src/core/zlib_helper.c
 )
@@ -504,9 +505,11 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/random_event.c
     ${PROJECT_SOURCE_DIR}/src/scenario/request.c
     ${PROJECT_SOURCE_DIR}/src/scenario/scenario.c
-    ${PROJECT_SOURCE_DIR}/src/scenario/scenario_events_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/scenario_event.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/scenario_events_import_xml.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/scenario_events_export_xml.c
     ${PROJECT_SOURCE_DIR}/src/scenario/scenario_events_controller.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/scenario_events_parameter_data.c
     ${PROJECT_SOURCE_DIR}/src/scenario/action_types/action_handler.c
     ${PROJECT_SOURCE_DIR}/src/scenario/action_types/change_allowed_buildings.c
     ${PROJECT_SOURCE_DIR}/src/scenario/action_types/change_resource_produced.c

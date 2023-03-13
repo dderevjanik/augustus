@@ -1,9 +1,8 @@
-#ifndef SCENARIO_EVENTS_XML_H
-#define SCENARIO_EVENTS_XML_H
+#ifndef SCENARIO_EVENTS_PARAMETER_DATA_H
+#define SCENARIO_EVENTS_PARAMETER_DATA_H
 
 #include "building/type.h"
 #include "city/message.h"
-#include "game/resource.h"
 #include "game/settings.h"
 #include "scenario/data.h"
 #include "scenario/scenario_event_data.h"
@@ -629,10 +628,7 @@ static special_attribute_mapping_t special_attribute_mappings_standard_message[S
     [61]    = { .type = PARAMETER_TYPE_STANDARD_MESSAGE,            .text = "enemies_leaving",           .value = MESSAGE_ENEMIES_LEAVING},
 };
 
+scenario_condition_data_t *scenario_events_parameter_data_get_conditions_xml_attributes(condition_types type);
+scenario_action_data_t *scenario_events_parameter_data_get_actions_xml_attributes(action_types type);
 
-scenario_condition_data_t *scenario_conditions_get_xml_attributes(condition_types type);
-scenario_action_data_t *scenario_actions_get_xml_attributes(action_types type);
-
-int scenario_events_xml_parse_file(const char *filename);
-
-#endif // SCENARIO_EVENTS_XML_H
+#endif // SCENARIO_EVENTS_PARAMETER_DATA_H
