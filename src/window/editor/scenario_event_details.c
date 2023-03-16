@@ -299,7 +299,7 @@ static void button_amount(int param1, int param2)
 void window_editor_scenario_event_details_show(int event_id)
 {
     window_type window = {
-        WINDOW_EDITOR_SCENARIO_EVENTS,
+        WINDOW_EDITOR_SCENARIO_EVENT_DETAILS,
         draw_background,
         draw_foreground,
         handle_input

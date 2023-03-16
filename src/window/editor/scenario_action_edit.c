@@ -160,7 +160,7 @@ static void button_amount(int param1, int param2)
 void window_editor_scenario_action_edit_show(scenario_action_t *action)
 {
     window_type window = {
-        WINDOW_EDITOR_SCENARIO_EVENTS,
+        WINDOW_EDITOR_SCENARIO_ACTION_EDIT,
         draw_background,
         draw_foreground,
         handle_input
