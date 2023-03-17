@@ -9,6 +9,11 @@ int scenario_action_type_trade_price_adjust_execute(scenario_action_t *action)
     int32_t adjustment = action->parameter2;
     int32_t show_message = action->parameter3;
 
+    if (resource <= RESOURCE_NONE
+        || resource >= RESOURCE_DENARII) {
+        return 0;
+    }
+
     int successfully_changed = trade_price_change(resource, adjustment);
     
     if (successfully_changed

@@ -11,6 +11,11 @@ int scenario_action_type_trade_route_amount_execute(scenario_action_t *action)
     int32_t amount = action->parameter3;
     int32_t show_message = action->parameter4;
 
+    if (resource <= RESOURCE_NONE
+        || resource >= RESOURCE_DENARII) {
+        return 0;
+    }
+
     trade_route_set_limit(route_id, resource, amount);
     if (show_message
         && empire_city_is_trade_route_open(route_id)) {

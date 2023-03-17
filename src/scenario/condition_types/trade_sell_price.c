@@ -9,6 +9,11 @@ int scenario_condition_type_trade_sell_price_met(scenario_condition_t *condition
     int type = condition->parameter2;
     int32_t value = condition->parameter3;
 
+    if (resource <= RESOURCE_NONE
+        || resource >= RESOURCE_DENARII) {
+        return 0;
+    }
+
     int trade_sell_price = trade_price_base_sell(resource);
     return comparison_helper_compare_values(type, trade_sell_price, (int)value);
 }

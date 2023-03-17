@@ -9,6 +9,11 @@ int scenario_action_type_trade_price_set_execute(scenario_action_t *action)
     int32_t amount = action->parameter2;
     int32_t set_buy_price = action->parameter3;
     int32_t show_message = action->parameter4;
+
+    if (resource <= RESOURCE_NONE
+        || resource >= RESOURCE_DENARII) {
+        return 0;
+    }
     
     int current_price = 0;
     if (set_buy_price) {

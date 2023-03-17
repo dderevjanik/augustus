@@ -222,6 +222,10 @@ static int xml_exporter_attribute_standard_message(xml_data_attribute_t *attr, i
 
 static void xml_exporter_event_condition(scenario_condition_t *condition)
 {
+    if (condition->type == CONDITION_TYPE_UNDEFINED) {
+        return;
+    }
+
     scenario_condition_data_t *data = scenario_events_parameter_data_get_conditions_xml_attributes(condition->type);
     if (data->type == CONDITION_TYPE_UNDEFINED) {
         return;
@@ -245,6 +249,10 @@ static void xml_exporter_event_condition(scenario_condition_t *condition)
 
 static void xml_exporter_event_action(scenario_action_t *action)
 {
+    if (action->type == ACTION_TYPE_UNDEFINED) {
+        return;
+    }
+
     scenario_action_data_t *data = scenario_events_parameter_data_get_actions_xml_attributes(action->type);
     if (data->type == ACTION_TYPE_UNDEFINED) {
         return;
@@ -268,6 +276,10 @@ static void xml_exporter_event_action(scenario_action_t *action)
 
 static int xml_exporter_event(scenario_event_t *event)
 {
+    if (event->state == EVENT_STATE_UNDEFINED) {
+        return 1;
+    }
+
     xml_exporter_new_element("event", 1);
 
     if (event->repeat_months_min > 0) {

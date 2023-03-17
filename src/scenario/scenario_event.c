@@ -35,7 +35,7 @@ void scenario_event_save_state(buffer *buf, scenario_event_t *event)
 
 void scenario_event_load_state(buffer *buf, int version, scenario_event_t *event)
 {
-    int expected_id = buffer_read_i32(buf);
+    int saved_id = buffer_read_i32(buf);
     event->state = buffer_read_i16(buf);
     event->repeat_months_min = buffer_read_i32(buf);
     event->repeat_months_max = buffer_read_i32(buf);
