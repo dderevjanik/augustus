@@ -36,7 +36,7 @@ static int parse_csv_line(const char *line, scenario_download_entry *entry)
 
     while (*line && col < 7) {
         if (*line == ',' || *line == '\n' || *line == '\r' || *(line + 1) == '\0') {
-            int length = (int)(line - field_start);
+            int length = (int) (line - field_start);
             if (*(line + 1) == '\0' && *line != ',' && *line != '\n' && *line != '\r') {
                 length++;
             }
@@ -50,7 +50,7 @@ static int parse_csv_line(const char *line, scenario_download_entry *entry)
                 case 6: copy_csv_field(field_start, length, entry->download_url, SCENARIO_DL_FIELD_MAX); break;
             }
             col++;
-            if (*line == ',' ) {
+            if (*line == ',') {
                 field_start = line + 1;
             }
         }
@@ -132,6 +132,17 @@ int scenario_download_fetch(void)
         return 0;
     }
 
+    // Debug: print raw response
+    log_info("Scenario download: response size", 0, (int) response.size);
+    if (response.data && response.size > 0) {
+        // Print first 2000 chars of response for debugging
+        int print_len = response.size > 2000 ? 2000 : (int) response.size;
+        char debug_buf[2048];
+        memcpy(debug_buf, response.data, print_len);
+        debug_buf[print_len] = '\0';
+        printf("=== SCENARIO LIST RESPONSE ===\n%s\n=== END RESPONSE ===\n", debug_buf);
+    }
+
     // Parse CSV - skip header line, then parse each subsequent line
     const char *cursor = (const char *) response.data;
     const char *end = cursor + response.size;
@@ -146,7 +157,7 @@ int scenario_download_fetch(void)
 
         if (line_num > 0) {
             // Make a null-terminated copy of the line
-            int line_len = (int)(cursor - line_start);
+            int line_len = (int) (cursor - line_start);
             if (line_len > 0 && line_start[line_len - 1] == '\r') {
                 line_len--;
             }

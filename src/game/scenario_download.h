@@ -8,7 +8,7 @@
 
 #define SCENARIO_DL_MAX_SCENARIOS 512
 #define SCENARIO_DL_FIELD_MAX 256
-#define SCENARIO_DL_API_URL "https://augustus.net/api/scenarios"
+#define SCENARIO_DL_API_URL "http://localhost:8080/api/scenarios"
 
 typedef struct {
     char name[SCENARIO_DL_FIELD_MAX];

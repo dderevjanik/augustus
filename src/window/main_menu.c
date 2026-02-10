@@ -25,13 +25,13 @@
 #include "window/file_dialog.h"
 #include "window/plain_message_dialog.h"
 #include "window/popup_dialog.h"
-`#include "window/scenario_download.h"
+#include "window/scenario_download.h"
 #include "window/select_campaign.h"
 #include "window/video.h"
 
 #define MAX_BUTTONS 7
 
-static void button_click(const generic_button * button);
+static void button_click(const generic_button *button);
 
 static struct {
     unsigned int focus_button_id;
