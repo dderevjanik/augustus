@@ -1914,7 +1914,18 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_LOCK_TRADE_ROUTE, "Lock Trade route"},
     {TR_PARAMETER_LOCK, "Lock"},
     {TR_PARAMETER_UNLOCK, "Unlock"},
-    {TR_PARAMETER_TERRAIN_RUBBLE, "Rubble"}
+    {TR_PARAMETER_TERRAIN_RUBBLE, "Rubble"},
+    {TR_MAIN_MENU_DOWNLOAD_SCENARIOS, "Download Scenarios"},
+    {TR_WINDOW_SCENARIO_DOWNLOAD_TITLE, "Download Scenarios"},
+    {TR_WINDOW_SCENARIO_DOWNLOAD_COL_NAME, "Scenario Name"},
+    {TR_WINDOW_SCENARIO_DOWNLOAD_COL_RATING, "Rating"},
+    {TR_WINDOW_SCENARIO_DOWNLOAD_COL_AUTHOR, "Author"},
+    {TR_WINDOW_SCENARIO_DOWNLOAD_COL_UPDATED, "Updated"},
+    {TR_WINDOW_SCENARIO_DOWNLOAD_COL_RELEASED, "Released"},
+    {TR_WINDOW_SCENARIO_DOWNLOAD_FETCHING, "Fetching scenario list..."},
+    {TR_WINDOW_SCENARIO_DOWNLOAD_FETCH_ERROR, "Failed to fetch scenario list"},
+    {TR_WINDOW_SCENARIO_DOWNLOAD_DOWNLOADED, "Already downloaded"},
+    {TR_WINDOW_SCENARIO_DOWNLOAD_DOWNLOADING, "Downloading..."}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)
