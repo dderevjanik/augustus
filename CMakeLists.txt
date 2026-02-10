@@ -12,6 +12,7 @@ option(DRAW_HIGHWAY_TERRAIN "Draw highway debug information." OFF)
 option(DRAW_ROAD_NETWORK_IDS "Draw road network IDs for debugging." OFF)
 option(DRAW_TILE_COORDS "Draw tile coordinates." OFF)
 option(AV1_VIDEO_SUPPORT "Enable AV1 video support." OFF)
+option(HTTP_SUPPORT "Enable HTTP networking support." ON)
 
 if(${TARGET_PLATFORM} STREQUAL "vita" AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if(DEFINED ENV{VITASDK})
@@ -833,9 +834,25 @@ if(${TARGET_PLATFORM} STREQUAL "emscripten")
     set(EMSCRIPTEN_FILES ${PROJECT_SOURCE_DIR}/res/shell.html)
 endif()
 
+set(HTTP_FILES "")
+if(HTTP_SUPPORT)
+    if(${TARGET_PLATFORM} STREQUAL "emscripten")
+        set(HTTP_FILES ${PROJECT_SOURCE_DIR}/src/core/http_emscripten.c)
+    elseif(${TARGET_PLATFORM} STREQUAL "vita" OR NINTENDO_SWITCH)
+        set(HTTP_FILES ${PROJECT_SOURCE_DIR}/src/core/http_stub.c)
+    else()
+        find_package(CURL REQUIRED)
+        set(HTTP_FILES ${PROJECT_SOURCE_DIR}/src/core/http_curl.c)
+        add_definitions(-DAUGUSTUS_USE_CURL)
+    endif()
+else()
+    set(HTTP_FILES ${PROJECT_SOURCE_DIR}/src/core/http_stub.c)
+endif()
+
 set(SOURCE_FILES
     ${PLATFORM_FILES}
     ${CORE_FILES}
+    ${HTTP_FILES}
     ${BUILDING_FILES}
     ${CITY_FILES}
     ${EMPIRE_FILES}
@@ -1149,6 +1166,10 @@ else()
     endif()
 
     target_link_libraries(${SHORT_NAME} ${SDL2MAIN_LIBRARY} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY} ${EASYAV1_LIBRARY})
+    if(CURL_FOUND)
+        target_link_libraries(${SHORT_NAME} ${CURL_LIBRARY})
+        target_include_directories(${SHORT_NAME} SYSTEM PRIVATE ${CURL_INCLUDE_DIR})
+    endif()
     if(NOT APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "android")
         install(TARGETS ${SHORT_NAME} RUNTIME DESTINATION bin)
     endif()

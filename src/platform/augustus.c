@@ -42,6 +42,10 @@
 #include <windows.h>
 #endif
 
+#ifdef AUGUSTUS_USE_CURL
+#include <curl/curl.h>
+#endif
+
 #if defined(USE_TINYFILEDIALOGS) || defined(__ANDROID__) || defined(__IPHONEOS__)
 #define SHOW_FOLDER_SELECT_DIALOG
 #endif
@@ -429,6 +433,9 @@ static void teardown(void)
     game_exit();
     platform_screen_destroy();
     SDL_Quit();
+#ifdef AUGUSTUS_USE_CURL
+    curl_global_cleanup();
+#endif
     teardown_logging();
 
 #ifdef __IPHONEOS__
@@ -633,6 +640,10 @@ static void setup(const augustus_args *args)
 {
     system_setup_crash_handler();
     setup_logging();
+
+#ifdef AUGUSTUS_USE_CURL
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+#endif
 
     if (data.log_file) {
         SDL_Log("Augustus version %s, %s build", system_version(), system_architecture());
