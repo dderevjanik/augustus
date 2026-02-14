@@ -102,6 +102,40 @@ formation *formation_create_legion(int building_id, figure_type type)
     return m;
 }
 
+formation *formation_create_legion_at(figure_type type, int x, int y)
+{
+    formation *m;
+    array_new_item_after_index(formations, 1, m);
+    if (!m) {
+        return array_first(formations);
+    }
+    m->faction_id = 1;
+    m->in_use = 1;
+    m->is_legion = 1;
+    m->figure_type = type;
+    m->building_id = 0;
+    m->layout = FORMATION_DOUBLE_LINE_1;
+    m->morale = 80;
+    m->is_at_fort = 0;
+    m->x = m->standard_x = m->x_home = x;
+    m->y = m->standard_y = m->y_home = y;
+    m->target_formation_id = 0;
+
+    m->legion_id = data.num_legions + 1;
+    if (m->legion_id >= 20) {
+        m->legion_id = 20;
+    }
+    data.num_legions++;
+    if (m->id > (unsigned int) data.id_last_in_use) {
+        data.id_last_in_use = m->id;
+    }
+
+    m->legion_flag_id = widget_sidebar_military_get_standard_image(m->legion_id);
+    m->legion_name_id = widget_sidebar_military_get_legion_name_id(m->legion_id);
+    m->legion_name_group = widget_sidebar_military_get_legion_name_group(m->legion_id);
+    return m;
+}
+
 static formation *formation_create(figure_type type, int layout, int orientation, int x, int y)
 {
     formation *f;

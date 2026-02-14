@@ -35,6 +35,7 @@
 #include "core/dir.h"
 #include "core/random.h"
 #include "editor/editor.h"
+#include "game/battlefield.h"
 #include "empire/city.h"
 #include "figure/formation.h"
 #include "figuretype/crime.h"
@@ -201,6 +202,22 @@ static void advance_tick(void)
 
 void game_tick_run(void)
 {
+    if (battlefield_is_active()) {
+        random_generate_next();
+        // Run only formation/combat-relevant ticks
+        switch (game_time_tick()) {
+            case 3: widget_minimap_invalidate(); break;
+            case 5: formation_update_all(0); break;
+            case 29: formation_update_all(1); break;
+            case 30: widget_minimap_invalidate(); break;
+        }
+        // Advance tick counter but never advance day
+        game_time_advance_tick();
+        figure_action_handle();
+        // Check if all enemies are defeated
+        battlefield_check_completion();
+        return;
+    }
     if (editor_is_active()) {
         random_generate_next(); // update random to randomize native huts
         figure_action_handle(); // just update the flag figures

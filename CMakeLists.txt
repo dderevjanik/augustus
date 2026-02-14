@@ -487,6 +487,7 @@ set(GAME_FILES
     ${PROJECT_SOURCE_DIR}/src/game/campaign/player_data.c
     ${PROJECT_SOURCE_DIR}/src/game/campaign/xml.c
     ${PROJECT_SOURCE_DIR}/src/game/animation.c
+    ${PROJECT_SOURCE_DIR}/src/game/battlefield.c
     ${PROJECT_SOURCE_DIR}/src/game/cheats.c
     ${PROJECT_SOURCE_DIR}/src/game/difficulty.c
     ${PROJECT_SOURCE_DIR}/src/game/file.c

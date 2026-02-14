@@ -14,6 +14,7 @@
 #include "figure/formation.h"
 #include "figure/formation_layout.h"
 #include "figure/route.h"
+#include "game/battlefield.h"
 #include "map/figure.h"
 #include "map/grid.h"
 #include "map/routing.h"
@@ -611,6 +612,10 @@ static void update_enemy_formation(formation *m, int *roman_distance)
             army->ignore_roman_soldiers = 1;
         }
     }
+    // Battlefield mode: always target troops, never ignore them
+    if (battlefield_is_active()) {
+        army->ignore_roman_soldiers = 0;
+    }
     formation_decrease_monthly_counters(m);
     if (city_figures_soldiers() <= 0) {
         formation_clear_monthly_counters(m);
@@ -664,9 +669,19 @@ static void update_enemy_formation(formation *m, int *roman_distance)
             army->destination_y = y_tile;
             army->destination_building_id = 0;
         } else {
-            if (!set_enemy_target_building(m) && !army->started_retreating && formation_fully_in_city(m)) {
-                city_message_post(1, MESSAGE_ENEMIES_LEAVING, 0, 0);
-                army->started_retreating = 1;
+            if (!set_enemy_target_building(m)) {
+                if (battlefield_is_active()) {
+                    // Battlefield: no buildings — always target troops instead of retreating
+                    if (map_soldier_strength_get_max(m->x_home, m->y_home, 80, &x_tile, &y_tile)) {
+                        army->destination_x = x_tile;
+                        army->destination_y = y_tile;
+                        army->destination_building_id = 0;
+                        *roman_distance = 1;
+                    }
+                } else if (!army->started_retreating && formation_fully_in_city(m)) {
+                    city_message_post(1, MESSAGE_ENEMIES_LEAVING, 0, 0);
+                    army->started_retreating = 1;
+                }
             }
             army->destination_x = m->destination_x;
             army->destination_y = m->destination_y;
