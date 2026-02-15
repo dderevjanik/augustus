@@ -37,6 +37,7 @@ static struct {
     int total_lines;
     int scroll_offset;
     int active;
+    int skip_next_text; // suppress text event from toggle key
     // Input line
     char input[MAX_INPUT_LENGTH];
     int input_len;
@@ -76,16 +77,12 @@ static void execute_lua(const char *code)
     snprintf(echo, MAX_LINE_LENGTH, "> %s", code);
     terminal_add_line(echo);
 
-    if (!scenario_lua_is_active()) {
-        terminal_add_line("[error] No Lua state active (load a scenario with a .lua script)");
+    if (!scenario_lua_ensure_state()) {
+        terminal_add_line("[error] Failed to initialize Lua state");
         return;
     }
 
     lua_State *L = scenario_lua_get_state();
-    if (!L) {
-        terminal_add_line("[error] Lua state is NULL");
-        return;
-    }
 
     int top = lua_gettop(L);
 
@@ -157,6 +154,7 @@ void terminal_toggle(void)
     data.active = !data.active;
     if (data.active) {
         data.scroll_offset = 0;
+        data.skip_next_text = 1;
     }
     window_invalidate();
 }
@@ -280,6 +278,10 @@ void terminal_handle_key_down(int scancode, int sym, int mod)
 void terminal_handle_text(const char *text_utf8)
 {
     if (!text_utf8) {
+        return;
+    }
+    if (data.skip_next_text) {
+        data.skip_next_text = 0;
         return;
     }
     int len = (int) strlen(text_utf8);

@@ -606,6 +606,7 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_resource.c
     ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_population.c
     ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_sound.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_empire.c
 )
 set(GRAPHICS_FILES
     ${PROJECT_SOURCE_DIR}/src/graphics/arrow_button.c
@@ -941,7 +942,11 @@ if(MSVC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /utf-8 /wd4100 /wd4244 /we4013")
     set_source_files_properties(${LUA_FILES} PROPERTIES COMPILE_FLAGS "/W0")
 else()
-    set_source_files_properties(${LUA_FILES} PROPERTIES COMPILE_FLAGS "-w")
+    if(${TARGET_PLATFORM} STREQUAL "ios")
+        set_source_files_properties(${LUA_FILES} PROPERTIES COMPILE_FLAGS "-w -DLUA_USE_IOS")
+    else()
+        set_source_files_properties(${LUA_FILES} PROPERTIES COMPILE_FLAGS "-w")
+    endif()
 endif()
 
 # Show debug info on crash on 32 bit builds compiled with MinGW
