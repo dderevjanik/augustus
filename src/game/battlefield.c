@@ -127,53 +127,13 @@ static void clear_battlefield_data(void)
     map_random_init();
 }
 
-static void setup_map(void)
+static void spawn_player_legion(const battlefield_army *army)
 {
-    // Set scenario map dimensions (same pattern as scenario_editor_create)
-    scenario.map.width = BATTLEFIELD_MAP_WIDTH;
-    scenario.map.height = BATTLEFIELD_MAP_HEIGHT;
-    scenario.map.grid_border_size = GRID_SIZE - BATTLEFIELD_MAP_WIDTH;
-    scenario.map.grid_start =
-        (GRID_SIZE - BATTLEFIELD_MAP_HEIGHT) / 2 * GRID_SIZE +
-        (GRID_SIZE - BATTLEFIELD_MAP_WIDTH) / 2;
+    for (int i = 0; i < army->count; i++) {
+        int x = army->x;
+        int y = army->y + i * army->y_spacing;
 
-    // Set entry/exit at map edges (needed for enemy retreat paths)
-    scenario.entry_point.x = BATTLEFIELD_MAP_WIDTH - 1;
-    scenario.entry_point.y = BATTLEFIELD_MAP_HEIGHT / 2;
-    scenario.exit_point.x = 0;
-    scenario.exit_point.y = BATTLEFIELD_MAP_HEIGHT / 2;
-
-    // Set climate to central
-    scenario_change_climate(CLIMATE_CENTRAL);
-    scenario.enemy_id = ENEMY_0_BARBARIAN;
-
-    // Initialize map grids and terrain
-    scenario_map_init();
-    map_tiles_update_all_empty_land();
-
-    // Load graphics
-    image_load_climate(CLIMATE_CENTRAL, 0, 0, 0);
-    image_load_enemy(ENEMY_0_BARBARIAN);
-
-    // Update routing
-    map_routing_update_all();
-
-    // Initialize entry/exit flags
-    scenario_map_init_entry_exit();
-
-    map_point entry = scenario_map_entry();
-    map_point exit = scenario_map_exit();
-    city_map_set_entry_point(entry.x, entry.y);
-    city_map_set_exit_point(exit.x, exit.y);
-}
-
-static void spawn_player_legions(void)
-{
-    for (int i = 0; i < BATTLEFIELD_PLAYER_LEGION_COUNT; i++) {
-        int x = BATTLEFIELD_PLAYER_X;
-        int y = BATTLEFIELD_PLAYER_Y + i * BATTLEFIELD_PLAYER_Y_SPACING;
-
-        formation *m = formation_create_legion_at(FIGURE_FORT_LEGIONARY, x, y);
+        formation *m = formation_create_legion_at(army->figure_type, x, y);
         if (!m || m->id == 0) {
             log_error("Battlefield: failed to create player legion", 0, 0);
             continue;
@@ -190,8 +150,8 @@ static void spawn_player_legions(void)
         }
 
         // Create soldiers
-        for (int s = 0; s < BATTLEFIELD_SOLDIERS_PER_LEGION; s++) {
-            figure *f = figure_create(FIGURE_FORT_LEGIONARY, x, y, DIR_4_BOTTOM);
+        for (int s = 0; s < army->soldiers; s++) {
+            figure *f = figure_create(army->figure_type, x, y, DIR_4_BOTTOM);
             if (f && f->id) {
                 f->formation_id = formation_id;
                 f->action_state = FIGURE_ACTION_84_SOLDIER_AT_STANDARD;
@@ -201,16 +161,16 @@ static void spawn_player_legions(void)
     }
 }
 
-static void spawn_enemy_forces(void)
+static void spawn_enemy_formation(const battlefield_army *army, int enemy_id)
 {
-    for (int i = 0; i < BATTLEFIELD_ENEMY_FORMATION_COUNT; i++) {
-        int x = BATTLEFIELD_ENEMY_X;
-        int y = BATTLEFIELD_ENEMY_Y + i * BATTLEFIELD_ENEMY_Y_SPACING;
+    for (int i = 0; i < army->count; i++) {
+        int x = army->x;
+        int y = army->y + i * army->y_spacing;
 
         int formation_id = formation_create_enemy(
-            FIGURE_ENEMY49_FAST_SWORD, x, y,
+            army->figure_type, x, y,
             FORMATION_ENEMY_MOB, DIR_0_TOP,
-            ENEMY_0_BARBARIAN, FORMATION_ATTACK_TROOPS,
+            enemy_id, FORMATION_ATTACK_TROOPS,
             0, 0
         );
         if (formation_id <= 0) {
@@ -218,22 +178,46 @@ static void spawn_enemy_forces(void)
             continue;
         }
 
-        for (int s = 0; s < BATTLEFIELD_ENEMIES_PER_FORMATION; s++) {
-            figure *f = figure_create(FIGURE_ENEMY49_FAST_SWORD, x, y, DIR_0_TOP);
+        for (int s = 0; s < army->soldiers; s++) {
+            figure *f = figure_create(army->figure_type, x, y, DIR_0_TOP);
             if (f && f->id) {
                 f->faction_id = 0;
                 f->is_friendly = 0;
                 f->action_state = FIGURE_ACTION_151_ENEMY_INITIAL;
                 f->wait_ticks = 10 * s + 10;
                 f->formation_id = formation_id;
-                f->name = figure_name_get(FIGURE_ENEMY49_FAST_SWORD, ENEMY_0_BARBARIAN);
+                f->name = figure_name_get(army->figure_type, enemy_id);
                 f->is_ghost = 1;
             }
         }
     }
 }
 
-void battlefield_start(void)
+static battlefield_config default_config(void)
+{
+    battlefield_config config;
+    config.enemy_id = ENEMY_0_BARBARIAN;
+
+    config.player_army_count = 1;
+    config.player_armies[0].figure_type = FIGURE_FORT_LEGIONARY;
+    config.player_armies[0].count = BATTLEFIELD_DEFAULT_LEGION_COUNT;
+    config.player_armies[0].soldiers = BATTLEFIELD_DEFAULT_SOLDIERS_PER_LEGION;
+    config.player_armies[0].x = BATTLEFIELD_DEFAULT_PLAYER_X;
+    config.player_armies[0].y = BATTLEFIELD_DEFAULT_PLAYER_Y;
+    config.player_armies[0].y_spacing = BATTLEFIELD_DEFAULT_PLAYER_Y_SPACING;
+
+    config.enemy_army_count = 1;
+    config.enemy_armies[0].figure_type = FIGURE_ENEMY49_FAST_SWORD;
+    config.enemy_armies[0].count = BATTLEFIELD_DEFAULT_ENEMY_FORMATION_COUNT;
+    config.enemy_armies[0].soldiers = BATTLEFIELD_DEFAULT_ENEMIES_PER_FORMATION;
+    config.enemy_armies[0].x = BATTLEFIELD_DEFAULT_ENEMY_X;
+    config.enemy_armies[0].y = BATTLEFIELD_DEFAULT_ENEMY_Y;
+    config.enemy_armies[0].y_spacing = BATTLEFIELD_DEFAULT_ENEMY_Y_SPACING;
+
+    return config;
+}
+
+void battlefield_start_configured(const battlefield_config *config)
 {
     terminal_add_line("[battlefield] Starting battlefield mode...");
 
@@ -250,14 +234,43 @@ void battlefield_start(void)
     // 1. Clear all game state
     clear_battlefield_data();
 
-    // 2. Set up empty flat map
-    setup_map();
+    // 2. Set up empty flat map — use config enemy_id for graphics
+    scenario_change_climate(CLIMATE_CENTRAL);
+    scenario.enemy_id = config->enemy_id;
 
-    // 3. Spawn player legions on the left
-    spawn_player_legions();
+    scenario.map.width = BATTLEFIELD_MAP_WIDTH;
+    scenario.map.height = BATTLEFIELD_MAP_HEIGHT;
+    scenario.map.grid_border_size = GRID_SIZE - BATTLEFIELD_MAP_WIDTH;
+    scenario.map.grid_start =
+        (GRID_SIZE - BATTLEFIELD_MAP_HEIGHT) / 2 * GRID_SIZE +
+        (GRID_SIZE - BATTLEFIELD_MAP_WIDTH) / 2;
 
-    // 4. Spawn enemy formations on the right
-    spawn_enemy_forces();
+    scenario.entry_point.x = BATTLEFIELD_MAP_WIDTH - 1;
+    scenario.entry_point.y = BATTLEFIELD_MAP_HEIGHT / 2;
+    scenario.exit_point.x = 0;
+    scenario.exit_point.y = BATTLEFIELD_MAP_HEIGHT / 2;
+
+    scenario_map_init();
+    map_tiles_update_all_empty_land();
+    image_load_climate(CLIMATE_CENTRAL, 0, 0, 0);
+    image_load_enemy(config->enemy_id);
+    map_routing_update_all();
+    scenario_map_init_entry_exit();
+
+    map_point entry = scenario_map_entry();
+    map_point exit = scenario_map_exit();
+    city_map_set_entry_point(entry.x, entry.y);
+    city_map_set_exit_point(exit.x, exit.y);
+
+    // 3. Spawn player armies
+    for (int i = 0; i < config->player_army_count && i < BATTLEFIELD_MAX_ARMIES; i++) {
+        spawn_player_legion(&config->player_armies[i]);
+    }
+
+    // 4. Spawn enemy armies
+    for (int i = 0; i < config->enemy_army_count && i < BATTLEFIELD_MAX_ARMIES; i++) {
+        spawn_enemy_formation(&config->enemy_armies[i], config->enemy_id);
+    }
 
     // 5. Link figures to formations
     formation_calculate_figures();
@@ -270,5 +283,11 @@ void battlefield_start(void)
     game_state_unpause();
     window_city_show();
 
-    terminal_add_line("[battlefield] Battlefield active: 2 player legions vs 2 enemy formations");
+    terminal_add_line("[battlefield] Battlefield active.");
+}
+
+void battlefield_start(void)
+{
+    battlefield_config config = default_config();
+    battlefield_start_configured(&config);
 }
