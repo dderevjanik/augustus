@@ -43,7 +43,6 @@
 #include "scenario/map.h"
 #include "scenario/property.h"
 #include "scenario/scenario.h"
-#include "scenario/lua/lua_state.h"
 #include "sound/city.h"
 #include "window/city.h"
 
@@ -87,7 +86,10 @@ void battlefield_check_completion(void)
 
 static void clear_battlefield_data(void)
 {
-    scenario_lua_shutdown();
+    // NOTE: Do NOT call scenario_lua_shutdown() here.
+    // battlefield_start may be called from a Lua callback (e.g. input dialog button),
+    // and destroying the Lua state mid-execution causes a segfault.
+    // The Lua state will be properly restored when battlefield_stop() loads the backup save.
 
     city_victory_reset();
     building_construction_clear_type();
