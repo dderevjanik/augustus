@@ -19,6 +19,7 @@
 #include "graphics/weather.h"
 #include "graphics/window.h"
 #include "sound/music.h"
+#include "window/battle_scenarios.h"
 #include "window/cck_selection.h"
 #include "window/config.h"
 #include "window/editor/map.h"
@@ -28,7 +29,7 @@
 #include "window/select_campaign.h"
 #include "window/video.h"
 
-#define MAX_BUTTONS 6
+#define MAX_BUTTONS 7
 
 static void button_click(const generic_button *button);
 
@@ -38,12 +39,13 @@ static struct {
 } data;
 
 static generic_button buttons[] = {
-    {192, 130, 256, 25, button_click, 0, 1},
-    {192, 170, 256, 25, button_click, 0, 2},
-    {192, 210, 256, 25, button_click, 0, 3},
-    {192, 250, 256, 25, button_click, 0, 4},
-    {192, 290, 256, 25, button_click, 0, 5},
-    {192, 330, 256, 25, button_click, 0, 6},
+    {192, 120, 256, 25, button_click, 0, 1},
+    {192, 155, 256, 25, button_click, 0, 2},
+    {192, 190, 256, 25, button_click, 0, 3},
+    {192, 225, 256, 25, button_click, 0, 4},
+    {192, 260, 256, 25, button_click, 0, 5},
+    {192, 295, 256, 25, button_click, 0, 6},
+    {192, 330, 256, 25, button_click, 0, 7},
 };
 
 static void draw_version_string(void)
@@ -88,11 +90,12 @@ static void draw_foreground(void)
             data.focus_button_id == i + 1 ? 1 : 0);
     }
 
-    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_MAIN_MENU_SELECT_CAMPAIGN, 192, 137, 256, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(30, 2, 192, 177, 256, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(30, 3, 192, 217, 256, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(9, 8, 192, 257, 256, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(2, 0, 192, 297, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_MAIN_MENU_SELECT_CAMPAIGN, 192, 127, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(30, 2, 192, 162, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(30, 3, 192, 197, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(CUSTOM_TRANSLATION, TR_MAIN_MENU_BATTLE_SCENARIOS, 192, 232, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(9, 8, 192, 267, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(2, 0, 192, 302, 256, FONT_NORMAL_GREEN);
     lang_text_draw_centered(30, 5, 192, 337, 256, FONT_NORMAL_GREEN);
 
     graphics_reset_dialog();
@@ -130,6 +133,8 @@ static void button_click(const generic_button *button)
     } else if (type == 3) {
         window_cck_selection_show();
     } else if (type == 4) {
+        window_battle_scenarios_show();
+    } else if (type == 5) {
         if (!editor_is_present() || !game_init_editor()) {
             window_plain_message_dialog_show(
                 TR_NO_EDITOR_TITLE, TR_NO_EDITOR_MESSAGE, 1);
@@ -137,9 +142,9 @@ static void button_click(const generic_button *button)
             if (config_get(CONFIG_UI_SHOW_INTRO_VIDEO)) window_video_show("map_intro.smk", window_editor_map_show);
             sound_music_play_editor();
         }
-    } else if (type == 5) {
-        window_config_show(CONFIG_FIRST_PAGE, 1);
     } else if (type == 6) {
+        window_config_show(CONFIG_FIRST_PAGE, 1);
+    } else if (type == 7) {
         window_popup_dialog_show(POPUP_DIALOG_QUIT, confirm_exit, 1);
     }
 }

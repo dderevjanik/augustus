@@ -6,6 +6,7 @@
 #include "city/warning.h"
 #include "core/config.h"
 #include "core/direction.h"
+#include "game/battlefield.h"
 #include "game/campaign.h"
 #include "game/orientation.h"
 #include "game/state.h"
@@ -310,6 +311,9 @@ static void button_collapse_expand(int param1, int param2)
 
 static void button_build(int submenu, int param2)
 {
+    if (battlefield_is_active()) {
+        return;
+    }
     window_build_menu_show(submenu);
 }
 

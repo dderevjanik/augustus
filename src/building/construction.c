@@ -23,6 +23,7 @@
 #include "core/config.h"
 #include "core/image.h"
 #include "figure/formation.h"
+#include "game/battlefield.h"
 #include "game/undo.h"
 #include "graphics/window.h"
 #include "map/aqueduct.h"
@@ -568,6 +569,9 @@ int building_construction_can_rotate(void)
 
 void building_construction_set_type(building_type type, int setup_rotation)
 {
+    if (battlefield_is_active()) {
+        return;
+    }
     if (type != data.type) {
         building_rotation_remove_rotation();
     }
