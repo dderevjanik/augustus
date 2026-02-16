@@ -2,6 +2,7 @@
 #include "lua/lauxlib.h"
 
 #include "city/victory.h"
+#include "game/battlefield.h"
 #include "game/settings.h"
 #include "game/time.h"
 #include "scenario/lua/lua_state.h"
@@ -61,6 +62,27 @@ static int l_game_api_version(lua_State *L)
     return 1;
 }
 
+// game.battlefield_start()
+static int l_game_battlefield_start(lua_State *L)
+{
+    battlefield_start();
+    return 0;
+}
+
+// game.battlefield_stop()
+static int l_game_battlefield_stop(lua_State *L)
+{
+    battlefield_stop();
+    return 0;
+}
+
+// game.battlefield_is_active() -> boolean
+static int l_game_battlefield_is_active(lua_State *L)
+{
+    lua_pushboolean(L, battlefield_is_active());
+    return 1;
+}
+
 static const luaL_Reg game_funcs[] = {
     {"year", l_game_year},
     {"month", l_game_month},
@@ -71,6 +93,10 @@ static const luaL_Reg game_funcs[] = {
     {"win", l_game_win},
     {"lose", l_game_lose},
     {"api_version", l_game_api_version},
+    // Battlefield
+    {"battlefield_start",     l_game_battlefield_start},
+    {"battlefield_stop",      l_game_battlefield_stop},
+    {"battlefield_is_active", l_game_battlefield_is_active},
     {NULL, NULL}
 };
 

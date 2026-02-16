@@ -43,3 +43,19 @@ function game.lose() end
 --- Use this to check compatibility and guard against unsupported features.
 ---@return integer version
 function game.api_version() end
+
+----------------------------------------------------------------
+-- Battlefield
+----------------------------------------------------------------
+
+--- Start a battlefield battle. Saves the current scenario, creates a flat map,
+--- and spawns player legions vs enemy formations. The previous scenario is
+--- restored when the battle ends (victory or manual stop).
+function game.battlefield_start() end
+
+--- Stop an active battlefield and restore the previously saved scenario.
+function game.battlefield_stop() end
+
+--- Check whether a battlefield battle is currently active.
+---@return boolean is_active
+function game.battlefield_is_active() end
