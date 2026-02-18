@@ -50,6 +50,7 @@
 
 static int is_active;
 static int has_backup;
+static int pending_stop;
 
 static const char BACKUP_FILENAME[] = "battlefield-backup.svx";
 
@@ -61,6 +62,7 @@ int battlefield_is_active(void)
 void battlefield_stop(void)
 {
     is_active = 0;
+    pending_stop = 0;
     if (has_backup) {
         has_backup = 0;
         terminal_add_line("[battlefield] Restoring previous scenario...");
@@ -73,6 +75,11 @@ void battlefield_stop(void)
     }
 }
 
+int battlefield_should_stop(void)
+{
+    return pending_stop;
+}
+
 void battlefield_check_completion(void)
 {
     if (!is_active) {
@@ -80,7 +87,7 @@ void battlefield_check_completion(void)
     }
     if (enemy_army_total_enemy_formations() <= 0) {
         terminal_add_line("[battlefield] Victory! All enemies defeated.");
-        battlefield_stop();
+        pending_stop = 1;
     }
 }
 

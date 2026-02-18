@@ -202,6 +202,11 @@ static void advance_tick(void)
 
 void game_tick_run(void)
 {
+    // Handle deferred battlefield stop before any tick processing
+    if (battlefield_should_stop()) {
+        battlefield_stop();
+        return;
+    }
     if (battlefield_is_active()) {
         random_generate_next();
         // Run only formation/combat-relevant ticks
@@ -214,7 +219,7 @@ void game_tick_run(void)
         // Advance tick counter but never advance day
         game_time_advance_tick();
         figure_action_handle();
-        // Check if all enemies are defeated
+        // Check if all enemies are defeated (sets pending_stop flag, handled next tick)
         battlefield_check_completion();
         return;
     }
