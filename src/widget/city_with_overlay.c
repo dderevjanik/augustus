@@ -140,6 +140,8 @@ static const city_overlay *get_city_overlay(void)
             return city_overlay_for_logistics();
         case OVERLAY_STORAGES:
             return city_overlay_for_storages();
+        case OVERLAY_MILITARY:
+            return city_overlay_for_military();
         case OVERLAY_HOUSE_SMALL_TENT:
             return city_overlay_for_small_tent();
         case OVERLAY_HOUSE_LARGE_TENT:

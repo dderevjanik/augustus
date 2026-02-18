@@ -61,6 +61,7 @@ enum {
     HEIGHT_6_38_BLOCKS = 6,
     HEIGHT_7_26_BLOCKS = 7,
     HEIGHT_8_40_BLOCKS = 8,
+    HEIGHT_9_32_BLOCKS = 9,
     HEIGHT_10_46_BLOCKS = 10,
     HEIGHT_11_28_BLOCKS = 11,
     HEIGHT_13_15_BLOCKS = 13,
@@ -138,7 +139,7 @@ static int get_height_id(void)
                 return HEIGHT_5_24_BLOCKS;
         }
     } else if (context.type == BUILDING_INFO_LEGION) {
-        return HEIGHT_7_26_BLOCKS;
+        return HEIGHT_9_32_BLOCKS;
     } else if (context.type == BUILDING_INFO_BUILDING) {
         const building *b = building_get(context.building_id);
         if (building_is_house(b->type)) {
@@ -527,6 +528,7 @@ static void init(int grid_offset)
         case 6: context.height_blocks = 38; break;
         case 7: context.height_blocks = 26; break;
         case 8: context.height_blocks = 40; break;
+        case 9: context.height_blocks = 32; break;
 
         case 10: context.height_blocks = 46; break;
         case 11: context.height_blocks = 28; break;

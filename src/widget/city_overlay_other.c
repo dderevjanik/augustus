@@ -1085,3 +1085,39 @@ const city_overlay *city_overlay_for_storages(void)
     };
     return &overlay;
 }
+
+static int show_building_military(const building *b)
+{
+    return building_is_fort(b->type)
+        || b->type == BUILDING_FORT_GROUND
+        || b->type == BUILDING_BARRACKS
+        || b->type == BUILDING_MILITARY_ACADEMY;
+}
+
+static int show_figure_military(const figure *f)
+{
+    return f->type == FIGURE_FORT_JAVELIN
+        || f->type == FIGURE_FORT_MOUNTED
+        || f->type == FIGURE_FORT_LEGIONARY
+        || f->type == FIGURE_FORT_STANDARD
+        || f->type == FIGURE_FORT_INFANTRY
+        || f->type == FIGURE_FORT_ARCHER
+        || f->type == FIGURE_TOWER_SENTRY;
+}
+
+const city_overlay *city_overlay_for_military(void)
+{
+    static city_overlay overlay = {
+        OVERLAY_MILITARY,
+        COLUMN_COLOR_GREEN,
+        show_building_military,
+        show_figure_military,
+        get_column_height_none,
+        get_tooltip_none,
+        0,
+        0,
+        0,
+        0
+    };
+    return &overlay;
+}
