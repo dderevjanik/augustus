@@ -1914,7 +1914,8 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_LOCK_TRADE_ROUTE, "Lock Trade route"},
     {TR_PARAMETER_LOCK, "Lock"},
     {TR_PARAMETER_UNLOCK, "Unlock"},
-    {TR_PARAMETER_TERRAIN_RUBBLE, "Rubble"}
+    {TR_PARAMETER_TERRAIN_RUBBLE, "Rubble"},
+    {TR_OVERLAY_MILITARY, "Military"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

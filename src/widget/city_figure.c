@@ -1,9 +1,11 @@
 #include "city_figure.h"
 
 #include "city/view.h"
+#include "core/string.h"
 #include "figure/formation.h"
 #include "figure/image.h"
 #include "figuretype/editor.h"
+#include "game/state.h"
 #include "graphics/image.h"
 #include "graphics/text.h"
 
@@ -117,15 +119,24 @@ static void draw_hippodrome_horse(const figure *f, int x, int y, color_t color_m
 
 static void draw_fort_standard(const figure *f, int x, int y, float scale)
 {
-    if (!formation_get(f->formation_id)->in_distant_battle) {
+    const formation *m = formation_get(f->formation_id);
+    if (!m->in_distant_battle) {
         // base
         image_draw(f->image_id, x, y, COLOR_MASK_NONE, scale);
         // flag
         int flag_height = image_get(f->cart_image_id)->height;
         image_draw(f->cart_image_id, x, y - flag_height, COLOR_MASK_NONE, scale);
         // top icon
-        int icon_image_id = formation_get(f->formation_id)->legion_flag_id;
-        image_draw(icon_image_id, x, y - image_get(icon_image_id)->height - flag_height, COLOR_MASK_NONE, scale);
+        int icon_image_id = m->legion_flag_id;
+        int icon_height = image_get(icon_image_id)->height;
+        image_draw(icon_image_id, x, y - icon_height - flag_height, COLOR_MASK_NONE, scale);
+        // soldier count (alive/max) above flag when military overlay is active
+        if (game_state_overlay() == OVERLAY_MILITARY) {
+            int alive = formation_legion_count_alive_soldiers(f->formation_id);
+            int text_y = y - icon_height - flag_height - 20;
+            int width = text_draw_number_scaled(alive, '@', string_from_ascii("/"), x, text_y, FONT_SMALL_PLAIN, COLOR_WHITE, scale);
+            text_draw_number_scaled(m->max_figures, '@', 0, x + width, text_y, FONT_SMALL_PLAIN, COLOR_WHITE, scale);
+        }
     }
 }
 

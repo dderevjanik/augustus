@@ -613,6 +613,7 @@ set(WIDGET_FILES
     ${PROJECT_SOURCE_DIR}/src/widget/map_editor.c
     ${PROJECT_SOURCE_DIR}/src/widget/map_editor_tool.c
     ${PROJECT_SOURCE_DIR}/src/widget/map_editor_pause_menu.c
+    ${PROJECT_SOURCE_DIR}/src/widget/military_status_bar.c
     ${PROJECT_SOURCE_DIR}/src/widget/minimap.c
     ${PROJECT_SOURCE_DIR}/src/widget/top_menu.c
     ${PROJECT_SOURCE_DIR}/src/widget/top_menu_editor.c
