@@ -29,4 +29,6 @@ const city_overlay *city_overlay_for_logistics(void);
 
 const city_overlay *city_overlay_for_storages(void);
 
+const city_overlay *city_overlay_for_military(void);
+
 #endif // WIGET_CITY_OVERLAY_OTHER_H

@@ -13,6 +13,7 @@
 #include "core/log.h"
 #include "core/string.h"
 #include "figure/formation_legion.h"
+#include "figure/properties.h"
 #include "graphics/button.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
@@ -32,11 +33,11 @@ static void button_priority(const generic_button *button);
 static void button_delivery(const generic_button *button);
 
 static generic_button layout_buttons[] = {
-    {19, 179, 84, 84, button_layout},
-    {104, 179, 84, 84, button_layout, 0, 1},
-    {189, 179, 84, 84, button_layout, 0, 2},
-    {274, 179, 84, 84, button_layout, 0, 3},
-    {359, 179, 84, 84, button_layout, 0, 4}
+    {19, 259, 84, 84, button_layout},
+    {104, 259, 84, 84, button_layout, 0, 1},
+    {189, 259, 84, 84, button_layout, 0, 2},
+    {274, 259, 84, 84, button_layout, 0, 3},
+    {359, 259, 84, 84, button_layout, 0, 4}
 };
 
 static generic_button priority_buttons[] = {
@@ -367,12 +368,28 @@ void window_building_draw_legion_info(building_info_context *c)
 
     // number of soldiers
     lang_text_draw(138, 23, c->x_offset + 100, c->y_offset + 60, FONT_NORMAL_BLACK);
-    text_draw_number(m->num_figures, '@', " ", c->x_offset + 283, c->y_offset + 60, FONT_NORMAL_BLACK, 0);
-    // health
-    lang_text_draw(138, 24, c->x_offset + 100, c->y_offset + 80, FONT_NORMAL_BLACK);
+    int sol_x = c->x_offset + 283;
+    sol_x += text_draw_number(m->num_figures, 0, "", sol_x, c->y_offset + 60, FONT_NORMAL_BLACK, 0);
+    sol_x += text_draw(string_from_ascii("/"), sol_x, c->y_offset + 60, FONT_NORMAL_BLACK, 0);
+    text_draw_number(m->max_figures, 0, " ", sol_x, c->y_offset + 60, FONT_NORMAL_BLACK, 0);
+    // soldier's health (numeric)
+    const figure_properties *props = figure_properties_for_type(m->figure_type);
+    int stats_x = c->x_offset + 100;
+    int stats_val_x = c->x_offset + 290;
+    int current_hp = m->max_total_damage - m->total_damage;
+    if (current_hp < 0) {
+        current_hp = 0;
+    }
+    int max_hp = m->max_total_damage;
+    text_draw(string_from_ascii("Soldiers' Health:"), stats_x, c->y_offset + 80, FONT_NORMAL_BLACK, 0);
+    int hp_x = stats_val_x + text_draw_number(current_hp, 0, "", stats_val_x, c->y_offset + 80, FONT_NORMAL_BLACK, 0);
+    hp_x += text_draw(string_from_ascii("/"), hp_x, c->y_offset + 80, FONT_NORMAL_BLACK, 0);
+    text_draw_number(max_hp, 0, " ", hp_x, c->y_offset + 80, FONT_NORMAL_BLACK, 0);
+    // health (text description)
+    lang_text_draw(138, 24, c->x_offset + 100, c->y_offset + 100, FONT_NORMAL_BLACK);
     if (m->mess_hall_max_morale_modifier < -20) {
         text_draw(translation_for(TR_BUILDING_LEGION_STARVING),
-            c->x_offset + 290, c->y_offset + 80, FONT_NORMAL_PLAIN, COLOR_FONT_RED);
+            c->x_offset + 290, c->y_offset + 100, FONT_NORMAL_PLAIN, COLOR_FONT_RED);
     } else {
         int health = calc_percentage(m->total_damage, m->max_total_damage);
         if (health <= 0) {
@@ -390,11 +407,8 @@ void window_building_draw_legion_info(building_info_context *c)
         } else {
             text_id = 32;
         }
-        lang_text_draw(138, text_id, c->x_offset + 290, c->y_offset + 80, FONT_NORMAL_BLACK);
+        lang_text_draw(138, text_id, c->x_offset + 290, c->y_offset + 100, FONT_NORMAL_BLACK);
     }
-    // military training
-    lang_text_draw(138, 25, c->x_offset + 100, c->y_offset + 100, FONT_NORMAL_BLACK);
-    lang_text_draw(18, m->has_military_training, c->x_offset + 290, c->y_offset + 100, FONT_NORMAL_BLACK);
     // morale
     if (m->cursed_by_mars) {
         lang_text_draw(138, 59, c->x_offset + 100, c->y_offset + 120, FONT_NORMAL_BLACK);
@@ -402,7 +416,7 @@ void window_building_draw_legion_info(building_info_context *c)
         lang_text_draw(138, 36, c->x_offset + 100, c->y_offset + 120, FONT_NORMAL_BLACK);
         lang_text_draw(138, 37 + morale_offset, c->x_offset + 290, c->y_offset + 120, FONT_NORMAL_BLACK);
     }
-    // food
+    // food status
     text_draw(translation_for(TR_BUILDING_LEGION_FOOD_STATUS),
         c->x_offset + 100, c->y_offset + 140, FONT_NORMAL_BLACK, 0);
     if (food_stress < 3) {
@@ -416,18 +430,30 @@ void window_building_draw_legion_info(building_info_context *c)
     } else {
         hunger_text = TR_BUILDING_MESS_HALL_TROOP_HUNGER_2;
     }
-
     text_draw(translation_for(hunger_text), c->x_offset + 290, c->y_offset + 140, FONT_NORMAL_BLACK, 0);
+    // academy trained
+    lang_text_draw(138, 25, c->x_offset + 100, c->y_offset + 160, FONT_NORMAL_BLACK);
+    lang_text_draw(18, m->has_military_training, c->x_offset + 290, c->y_offset + 160, FONT_NORMAL_BLACK);
+    // blank line at y+180
+    // combat stats
+    text_draw(string_from_ascii("Attack:"), stats_x, c->y_offset + 200, FONT_NORMAL_BLACK, 0);
+    text_draw_number(props->attack_value, 0, " ", stats_val_x, c->y_offset + 200, FONT_NORMAL_BLACK, 0);
+    if (props->missile_attack_value > 0) {
+        text_draw(string_from_ascii("Missile ATK:"), stats_x, c->y_offset + 220, FONT_NORMAL_BLACK, 0);
+        text_draw_number(props->missile_attack_value, 0, " ", stats_val_x, c->y_offset + 220, FONT_NORMAL_BLACK, 0);
+    }
+    text_draw(string_from_ascii("Defense:"), stats_x, c->y_offset + 240, FONT_NORMAL_BLACK, 0);
+    text_draw_number(props->defense_value, 0, " ", stats_val_x, c->y_offset + 240, FONT_NORMAL_BLACK, 0);
     // food warnings
     if (m->mess_hall_max_morale_modifier < -20) {
         text_draw_centered(translation_for(TR_BUILDING_LEGION_FOOD_WARNING_2),
-            c->x_offset + 20, c->y_offset + 355, c->width_blocks * 16 - 40, FONT_NORMAL_PLAIN, COLOR_FONT_RED);
+            c->x_offset + 20, c->y_offset + 435, c->width_blocks * 16 - 40, FONT_NORMAL_PLAIN, COLOR_FONT_RED);
     } else if (m->mess_hall_max_morale_modifier < -5) {
         text_draw_centered(translation_for(TR_BUILDING_LEGION_FOOD_WARNING_1),
-            c->x_offset + 20, c->y_offset + 355, c->width_blocks * 16 - 40, FONT_NORMAL_BLACK, 0);
+            c->x_offset + 20, c->y_offset + 435, c->width_blocks * 16 - 40, FONT_NORMAL_BLACK, 0);
     } else if (m->mess_hall_max_morale_modifier > 0) {
         text_draw_centered(translation_for(TR_BUILDING_LEGION_FOOD_BONUS),
-            c->x_offset + 20, c->y_offset + 355, c->width_blocks * 16 - 40, FONT_NORMAL_BLACK, 0);
+            c->x_offset + 20, c->y_offset + 435, c->width_blocks * 16 - 40, FONT_NORMAL_BLACK, 0);
     }
 
     if (m->num_figures) {
@@ -449,7 +475,7 @@ void window_building_draw_legion_info(building_info_context *c)
             offsets = OFFSETS_OTHER[index];
         }
         for (int i = 5 - c->formation_types; i < 5; i++) {
-            image_draw(image_group(GROUP_FORT_FORMATIONS) + offsets[i], c->x_offset + 21 + 85 * i, c->y_offset + 181,
+            image_draw(image_group(GROUP_FORT_FORMATIONS) + offsets[i], c->x_offset + 21 + 85 * i, c->y_offset + 261,
                 COLOR_MASK_NONE, SCALE_NONE);
         }
         window_building_draw_legion_info_foreground(c);
@@ -466,7 +492,7 @@ void window_building_draw_legion_info(building_info_context *c)
             group_id = 138;
             text_id = 11;
         }
-        window_building_draw_description_at(c, 172, group_id, text_id);
+        window_building_draw_description_at(c, 252, group_id, text_id);
     }
 }
 
@@ -507,10 +533,10 @@ void window_building_draw_legion_info_foreground(building_info_context *c)
                 has_focus = 1;
             }
         }
-        button_border_draw(c->x_offset + 19 + 85 * i, c->y_offset + 179, 84, 84, has_focus);
+        button_border_draw(c->x_offset + 19 + 85 * i, c->y_offset + 259, 84, 84, has_focus);
     }
 
-    inner_panel_draw(c->x_offset + 16, c->y_offset + 270, c->width_blocks - 2, 5);
+    inner_panel_draw(c->x_offset + 16, c->y_offset + 350, c->width_blocks - 2, 5);
 
     int title_id;
     int text_id;
@@ -576,8 +602,8 @@ void window_building_draw_legion_info_foreground(building_info_context *c)
             }
             break;
     }
-    lang_text_draw(138, title_id, c->x_offset + 24, c->y_offset + 276, FONT_NORMAL_WHITE);
-    lang_text_draw_multiline(138, text_id, c->x_offset + 24, c->y_offset + 292,
+    lang_text_draw(138, title_id, c->x_offset + 24, c->y_offset + 356, FONT_NORMAL_WHITE);
+    lang_text_draw_multiline(138, text_id, c->x_offset + 24, c->y_offset + 372,
         BLOCK_SIZE * (c->width_blocks - 4), FONT_NORMAL_GREEN);
 
     if (!m->is_at_fort && !m->in_distant_battle) {

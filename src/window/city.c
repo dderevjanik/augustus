@@ -43,6 +43,7 @@
 #include "widget/city_with_overlay.h"
 #include "widget/top_menu.h"
 #include "widget/sidebar/city.h"
+#include "widget/military_status_bar.h"
 #include "widget/sidebar/extra.h"
 #include "widget/sidebar/military.h"
 #include "window/advisors.h"
@@ -277,6 +278,7 @@ static void draw_foreground(void)
     window_city_draw();
     widget_sidebar_city_draw_foreground();
     draw_speedrun_info();
+    widget_military_status_bar_draw();
     if (window_city_is_window_cityview()) {
         draw_time_left();
         window_city_draw_custom_variables_text_display();
@@ -300,6 +302,7 @@ static void draw_foreground_military(void)
     } else {
         widget_sidebar_city_draw_foreground();
     }
+    widget_military_status_bar_draw();
     draw_time_left();
     widget_city_draw_construction_buttons();
     if (!mouse_get()->is_touch || sidebar_extra_is_information_displayed(SIDEBAR_EXTRA_DISPLAY_GAME_SPEED)) {
@@ -839,6 +842,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
         if (widget_sidebar_city_handle_mouse(m)) {
             return;
         }
+        if (widget_military_status_bar_handle_mouse(m)) {
+            return;
+        }
     }
     widget_city_handle_input(m, h);
 }
@@ -850,6 +856,9 @@ static void handle_input_military(const mouse *m, const hotkeys *h)
         return;
     }
     if (config_get(CONFIG_UI_SHOW_MILITARY_SIDEBAR) && widget_sidebar_military_handle_input(m)) {
+        return;
+    }
+    if (widget_military_status_bar_handle_mouse(m)) {
         return;
     }
     widget_city_handle_input_military(m, h, formation_get_selected());
