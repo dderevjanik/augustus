@@ -4,8 +4,12 @@
 #include "building/count.h"
 #include "city/view.h"
 #include "core/calc.h"
+#include "core/config.h"
+#include "core/string.h"
 #include "figure/formation.h"
 #include "figure/formation_legion.h"
+#include "figure/properties.h"
+#include <stdio.h>
 #include "graphics/arrow_button.h"
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
@@ -283,7 +287,7 @@ static void update_legion_info(legion_info *legion, const formation *m)
     legion->empire_service = m->empire_service;
 }
 
-static void draw_military_info_text(int x_offset, int y_offset)
+static void draw_military_info_text_classic(int x_offset, int y_offset)
 {
     legion_info *legion = &data.active_legion;
     const formation *m = formation_get(legion->formation_id);
@@ -340,6 +344,69 @@ static void draw_military_info_text(int x_offset, int y_offset)
     lang_text_draw_ellipsized(138, 24, x_offset, y_offset + 120, ellipsized_width, FONT_NORMAL_WHITE);
     lang_text_draw_ellipsized(138, get_health_text_id(legion->health), x_offset + 4, y_offset + 138,
         ellipsized_width, legion->health < 55 ? FONT_NORMAL_GREEN : FONT_NORMAL_RED);
+}
+
+static void draw_military_info_text_enhanced(int x_offset, int y_offset)
+{
+    legion_info *legion = &data.active_legion;
+    const formation *m = formation_get(legion->formation_id);
+    update_legion_info(legion, m);
+
+    int bar_w = CONTENT_WIDTH;
+    int bar_h = 10;
+    int y = y_offset + 10;
+
+    // Row 1: Icon + Legion Name
+    int formation_image_id = m->legion_flag_id;
+    const image *formation_image = image_get(formation_image_id);
+    image_draw(formation_image_id, x_offset, y, COLOR_MASK_NONE, SCALE_NONE);
+    int name_x = x_offset + formation_image->width + formation_image->x_offset + 4;
+    int name_w = CONTENT_WIDTH - (name_x - x_offset);
+    lang_text_draw_ellipsized(m->legion_name_group, m->legion_name_id, name_x, y + 4, name_w, FONT_NORMAL_WHITE);
+    y += 24;
+
+    // Row 2: Troop health bar
+    int troop_pct = m->max_figures > 0 ? m->num_figures * 100 / m->max_figures : 0;
+    int troop_fill = bar_w * troop_pct / 100;
+    color_t troop_color = troop_pct < 30 ? COLOR_RED : COLOR_FONT_GREEN;
+    graphics_fill_rect(x_offset, y, bar_w, bar_h, COLOR_BLACK);
+    if (troop_fill > 0) {
+        graphics_fill_rect(x_offset, y, troop_fill, bar_h, troop_color);
+    }
+    char soldiers_buf[20];
+    snprintf(soldiers_buf, sizeof(soldiers_buf), "%d/%d", m->num_figures, m->max_figures);
+    text_draw_centered(string_from_ascii(soldiers_buf), x_offset, y, bar_w, FONT_SMALL_PLAIN, COLOR_WHITE);
+    y += bar_h + 3;
+
+    // Row 3: Morale bar
+    int morale_pct = m->morale > 100 ? 100 : m->morale;
+    int morale_fill = bar_w * morale_pct / 100;
+    graphics_fill_rect(x_offset, y, bar_w, bar_h, COLOR_BLACK);
+    if (morale_fill > 0 && m->num_figures > 0) {
+        graphics_fill_rect(x_offset, y, morale_fill, bar_h, COLOR_FONT_BLUE);
+    }
+    y += bar_h + 6;
+
+    // Row 4: Attack / Missile Attack
+    const figure_properties *props = figure_properties_for_type(m->figure_type);
+    char atk_buf[40];
+    snprintf(atk_buf, sizeof(atk_buf), "Atk: %d / Missile: %d", props->attack_value, props->missile_attack_value);
+    text_draw(string_from_ascii(atk_buf), x_offset, y, FONT_SMALL_PLAIN, COLOR_WHITE);
+    y += 14;
+
+    // Row 5: Melee Defense / Ranged Defense
+    char def_buf[40];
+    snprintf(def_buf, sizeof(def_buf), "Def: %d / Range: %d", props->defense_value, props->missile_defense_value);
+    text_draw(string_from_ascii(def_buf), x_offset, y, FONT_SMALL_PLAIN, COLOR_WHITE);
+}
+
+static void draw_military_info_text(int x_offset, int y_offset)
+{
+    if (config_get(CONFIG_UI_SHOW_MILITARY_SIDEBAR)) {
+        draw_military_info_text_enhanced(x_offset, y_offset);
+    } else {
+        draw_military_info_text_classic(x_offset, y_offset);
+    }
 }
 
 static void draw_military_info_buttons(int x_offset, int y_offset)
