@@ -12,10 +12,14 @@
 #include "graphics/image.h"
 #include "graphics/panel.h"
 #include "graphics/screen.h"
+#include "graphics/text.h"
+#include "core/string.h"
 #include "widget/sidebar/military.h"
+#include <stdio.h>
 #include "window/city.h"
 
-#define SLOT_WIDTH 70
+#define SLOT_WIDTH 60
+#define SLOT_SPACING 4
 #define MAX_SLOTS 20
 #define BORDER_WIDTH 16
 #define CONTENT_PADDING 8
@@ -23,7 +27,7 @@
 #define CONTENT_BOTTOM (BORDER_WIDTH + CONTENT_PADDING)
 #define CONTENT_LEFT (BORDER_WIDTH + CONTENT_PADDING)
 #define CONTENT_RIGHT (BORDER_WIDTH + CONTENT_PADDING)
-#define SLOT_HEIGHT 100
+#define SLOT_HEIGHT 125
 #define BAR_HEIGHT (CONTENT_TOP + SLOT_HEIGHT + CONTENT_BOTTOM)
 
 static void button_select_legion(const generic_button *button);
@@ -134,7 +138,7 @@ void widget_military_status_bar_draw(void)
 
     int bar_x = vp_x;
     int bar_y = vp_y + vp_height - BAR_HEIGHT;
-    int bar_width = CONTENT_LEFT + data.num_legions * SLOT_WIDTH + CONTENT_RIGHT;
+    int bar_width = CONTENT_LEFT + data.num_legions * (SLOT_WIDTH + SLOT_SPACING) - SLOT_SPACING + CONTENT_RIGHT;
     if (bar_width > vp_width) {
         bar_width = vp_width;
     }
@@ -146,8 +150,8 @@ void widget_military_status_bar_draw(void)
     // Solid background fill to cover any gaps from panel tiling
     int inner_x = bar_x + BORDER_WIDTH;
     int inner_y = bar_y + BORDER_WIDTH;
-    int inner_w = bar_width - 2 * BORDER_WIDTH;
-    int inner_h = BAR_HEIGHT - 2 * BORDER_WIDTH;
+    int inner_w = bar_width - 2 * BORDER_WIDTH + 10;
+    int inner_h = BAR_HEIGHT - 2 * BORDER_WIDTH + 30;
     graphics_fill_rect(inner_x, inner_y, inner_w, inner_h, COLOR_BLACK);
     inner_panel_draw(inner_x, inner_y, inner_w / BLOCK_SIZE, inner_h / BLOCK_SIZE);
 
@@ -175,10 +179,10 @@ void widget_military_status_bar_draw(void)
 
     for (int i = 0; i < data.num_legions; i++) {
         const formation *m = formation_get(data.formation_ids[i]);
-        int slot_x = content_x + i * SLOT_WIDTH;
+        int slot_x = content_x + i * (SLOT_WIDTH + SLOT_SPACING);
         int slot_center_x = slot_x + SLOT_WIDTH / 2;
 
-        legion_buttons[i].x = CONTENT_LEFT + i * SLOT_WIDTH;
+        legion_buttons[i].x = CONTENT_LEFT + i * (SLOT_WIDTH + SLOT_SPACING);
         legion_buttons[i].y = CONTENT_TOP;
         legion_buttons[i].width = SLOT_WIDTH;
         legion_buttons[i].height = SLOT_HEIGHT;
@@ -196,10 +200,40 @@ void widget_military_status_bar_draw(void)
             image_draw(soldier_image, fig_x - 5, content_y, COLOR_MASK_NONE, SCALE_NONE);
         }
 
+        // Draw troop count bar below figure
+        int bar_x = slot_x + 2;
+        int bar_w = SLOT_WIDTH - 4;
+        int bar_h = 9;
+        int bar_y = content_y + 85;
+        int troop_pct = m->max_figures > 0 ? m->num_figures * 100 / m->max_figures : 0;
+        int troop_fill = bar_w * troop_pct / 100;
+        color_t troop_bar_color = troop_pct < 30 ? COLOR_RED : COLOR_FONT_GREEN;
+        graphics_fill_rect(bar_x, bar_y, bar_w, bar_h, COLOR_BLACK);
+        if (troop_fill > 0) {
+            graphics_fill_rect(bar_x, bar_y, troop_fill, bar_h, troop_bar_color);
+        }
+        char soldiers_buf[20];
+        snprintf(soldiers_buf, sizeof(soldiers_buf), "%d/%d", m->num_figures, m->max_figures);
+        text_draw_centered(string_from_ascii(soldiers_buf), slot_x, bar_y, SLOT_WIDTH, FONT_SMALL_PLAIN, COLOR_WHITE);
+
+        // Draw morale bar below troop bar
+        int morale_y = bar_y + bar_h + 2;
+        int morale_pct = m->morale > 100 ? 100 : m->morale;
+        int morale_fill = bar_w * morale_pct / 100;
+        graphics_fill_rect(bar_x, morale_y, bar_w, bar_h, COLOR_BLACK);
+        if (morale_fill > 0 && m->num_figures > 0) {
+            graphics_fill_rect(bar_x, morale_y, morale_fill, bar_h, COLOR_FONT_BLUE);
+        }
+
         // Draw highlight border
         int is_selected = ((int) formation_get_selected() == data.formation_ids[i]);
         int is_focused = (data.focus_button_id == (unsigned int) (i + 1));
         button_border_draw(slot_x, content_y, SLOT_WIDTH, SLOT_HEIGHT, is_focused || is_selected);
+
+        // Draw fort/outside status indicator in top-right corner
+        const uint8_t *status_text = m->is_at_fort ? string_from_ascii("F") : string_from_ascii("O");
+        color_t status_color = m->is_at_fort ? COLOR_FONT_YELLOW : COLOR_FONT_RED;
+        text_draw(status_text, slot_x + SLOT_WIDTH - 14, content_y + 8, FONT_SMALL_PLAIN, status_color);
     }
 }
 
