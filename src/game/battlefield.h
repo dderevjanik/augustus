@@ -53,4 +53,14 @@ int battlefield_spawn_enemies(figure_type type, int count, int soldiers, int x, 
 void battlefield_win(void);
 void battlefield_lose(void);
 
+// Notifications from game systems — call these when figures/formations die
+void battlefield_on_figure_killed(int figure_type, int is_enemy);
+void battlefield_on_formation_destroyed(int figure_type, int is_enemy);
+
+// Death count queries
+int battlefield_enemy_death_count(int filter_type);
+int battlefield_player_death_count(int filter_type);
+int battlefield_enemy_formation_death_count(int filter_type);
+int battlefield_player_formation_death_count(int filter_type);
+
 #endif // GAME_BATTLEFIELD_H

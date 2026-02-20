@@ -162,6 +162,68 @@ function battlefield.enemy_formation_count(figure_type) end
 function battlefield.player_formation_count(figure_type) end
 
 ----------------------------------------------------------------
+-- Battlefield death counts
+----------------------------------------------------------------
+
+--- Get the number of enemy figures killed since the battlefield started.
+--- If figure_type is given, only counts kills of that specific type.
+---
+--- ```lua
+--- local total_kills = battlefield.enemy_death_count()
+--- local sword_kills = battlefield.enemy_death_count(battlefield.FIGURE_TYPE.ENEMY_FAST_SWORD)
+--- ```
+---@param figure_type? integer Optional figure type filter (see battlefield.FIGURE_TYPE.*)
+---@return integer count Number of enemy figures killed
+function battlefield.enemy_death_count(figure_type) end
+
+--- Get the number of player (legion) figures killed since the battlefield started.
+--- If figure_type is given, only counts deaths of that specific type.
+---
+--- ```lua
+--- local total_losses = battlefield.player_death_count()
+--- local legionary_losses = battlefield.player_death_count(battlefield.FIGURE_TYPE.LEGIONARY)
+--- ```
+---@param figure_type? integer Optional figure type filter (see battlefield.FIGURE_TYPE.*)
+---@return integer count Number of player figures killed
+function battlefield.player_death_count(figure_type) end
+
+--- Get the number of enemy formations destroyed since the battlefield started.
+--- If figure_type is given, only counts formations of that specific type.
+---@param figure_type? integer Optional figure type filter
+---@return integer count Number of enemy formations destroyed
+function battlefield.enemy_formation_death_count(figure_type) end
+
+--- Get the number of player formations destroyed since the battlefield started.
+--- If figure_type is given, only counts formations of that specific type.
+---@param figure_type? integer Optional figure type filter
+---@return integer count Number of player formations destroyed
+function battlefield.player_formation_death_count(figure_type) end
+
+----------------------------------------------------------------
+-- Battlefield hooks (callbacks)
+----------------------------------------------------------------
+
+--- Called when an enemy figure is killed in combat.
+--- Only fires during an active battlefield.
+---@param figure_type integer The type of enemy figure that was killed
+function on_enemy_killed(figure_type) end
+
+--- Called when a player (legion) figure is killed in combat.
+--- Only fires during an active battlefield.
+---@param figure_type integer The type of player figure that was killed
+function on_player_killed(figure_type) end
+
+--- Called when an enemy formation is destroyed (all its figures are dead).
+--- Only fires during an active battlefield.
+---@param figure_type integer The figure type of the destroyed formation
+function on_enemy_formation_destroyed(figure_type) end
+
+--- Called when a player formation is destroyed (all its figures are dead).
+--- Only fires during an active battlefield.
+---@param figure_type integer The figure type of the destroyed formation
+function on_player_formation_destroyed(figure_type) end
+
+----------------------------------------------------------------
 -- Battlefield constants
 ----------------------------------------------------------------
 

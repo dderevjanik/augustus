@@ -8,6 +8,7 @@
 #include "figure/properties.h"
 #include "figure/route.h"
 #include "figure/sound.h"
+#include "game/battlefield.h"
 #include "game/difficulty.h"
 #include "map/figure.h"
 #include "scenario/lua/lua_hooks.h"
@@ -138,6 +139,7 @@ static void hit_opponent(figure *f)
         opponent->action_state = FIGURE_ACTION_149_CORPSE;
         opponent->wait_ticks = 0;
         scenario_lua_hook_on_figure_died(opponent->type, opponent->x, opponent->y);
+        battlefield_on_figure_killed(opponent->type, figure_is_enemy(opponent));
         figure_play_die_sound(opponent);
         formation_update_morale_after_death(opponent_formation);
     }

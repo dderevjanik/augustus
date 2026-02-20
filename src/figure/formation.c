@@ -14,6 +14,7 @@
 #include "figure/formation_herd.h"
 #include "figure/formation_legion.h"
 #include "figure/properties.h"
+#include "game/battlefield.h"
 #include "game/save_version.h"
 #include "game/cheats.h"
 #include "map/grid.h"
@@ -781,10 +782,15 @@ void formation_calculate_figures(void)
                             sound_effect_play(SOUND_EFFECT_FORMATION_SHIELD);
                         }
                     }
+                } else if (m->max_figures > 0) {
+                    // Legion had figures but now has none — notify battlefield
+                    battlefield_on_formation_destroyed(m->figure_type, 0);
+                    m->max_figures = 0;
                 }
             } else {
                 // enemy
                 if (m->num_figures <= 0) {
+                    battlefield_on_formation_destroyed(m->figure_type, 1);
                     formation_clear(m->id);
                 } else {
                     enemy_army_totals_add_enemy_formation(m->num_figures);

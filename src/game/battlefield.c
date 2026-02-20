@@ -60,6 +60,17 @@ static int pending_lua_reload;
 static char original_lua_source[300]; // scenario file for original Lua script restoration
 static char battlefield_lua_source[300]; // scenario/map file for battlefield Lua script
 
+// Death tracking
+#define MAX_TRACKED_TYPES 128
+static int enemy_deaths[MAX_TRACKED_TYPES];
+static int player_deaths[MAX_TRACKED_TYPES];
+static int enemy_formation_deaths[MAX_TRACKED_TYPES];
+static int player_formation_deaths[MAX_TRACKED_TYPES];
+static int total_enemy_deaths;
+static int total_player_deaths;
+static int total_enemy_formation_deaths;
+static int total_player_formation_deaths;
+
 static const char BACKUP_FILENAME[] = "battlefield-backup.svx";
 
 static void save_backup(void)
@@ -180,6 +191,16 @@ static void clear_battlefield_data(void)
     // battlefield_start may be called from a Lua callback (e.g. input dialog button),
     // and destroying the Lua state mid-execution causes a segfault.
     // Lua shutdown is deferred to battlefield_process_pending_lua(), called on the next tick.
+
+    // Reset death counters
+    memset(enemy_deaths, 0, sizeof(enemy_deaths));
+    memset(player_deaths, 0, sizeof(player_deaths));
+    memset(enemy_formation_deaths, 0, sizeof(enemy_formation_deaths));
+    memset(player_formation_deaths, 0, sizeof(player_formation_deaths));
+    total_enemy_deaths = 0;
+    total_player_deaths = 0;
+    total_enemy_formation_deaths = 0;
+    total_player_formation_deaths = 0;
 
     city_victory_reset();
     building_construction_clear_type();
@@ -559,4 +580,88 @@ int battlefield_spawn_enemies(figure_type type, int count, int soldiers, int x, 
     spawn_enemy_formation(&army, scenario_property_enemy());
     formation_calculate_figures();
     return 1;
+}
+
+void battlefield_on_figure_killed(int fig_type, int is_enemy)
+{
+    if (!is_active) {
+        return;
+    }
+    if (is_enemy) {
+        total_enemy_deaths++;
+        if (fig_type >= 0 && fig_type < MAX_TRACKED_TYPES) {
+            enemy_deaths[fig_type]++;
+        }
+        scenario_lua_hook_on_enemy_killed(fig_type);
+    } else {
+        total_player_deaths++;
+        if (fig_type >= 0 && fig_type < MAX_TRACKED_TYPES) {
+            player_deaths[fig_type]++;
+        }
+        scenario_lua_hook_on_player_killed(fig_type);
+    }
+}
+
+void battlefield_on_formation_destroyed(int fig_type, int is_enemy)
+{
+    if (!is_active) {
+        return;
+    }
+    if (is_enemy) {
+        total_enemy_formation_deaths++;
+        if (fig_type >= 0 && fig_type < MAX_TRACKED_TYPES) {
+            enemy_formation_deaths[fig_type]++;
+        }
+        scenario_lua_hook_on_enemy_formation_destroyed(fig_type);
+    } else {
+        total_player_formation_deaths++;
+        if (fig_type >= 0 && fig_type < MAX_TRACKED_TYPES) {
+            player_formation_deaths[fig_type]++;
+        }
+        scenario_lua_hook_on_player_formation_destroyed(fig_type);
+    }
+}
+
+int battlefield_enemy_death_count(int filter_type)
+{
+    if (filter_type < 0) {
+        return total_enemy_deaths;
+    }
+    if (filter_type < MAX_TRACKED_TYPES) {
+        return enemy_deaths[filter_type];
+    }
+    return 0;
+}
+
+int battlefield_player_death_count(int filter_type)
+{
+    if (filter_type < 0) {
+        return total_player_deaths;
+    }
+    if (filter_type < MAX_TRACKED_TYPES) {
+        return player_deaths[filter_type];
+    }
+    return 0;
+}
+
+int battlefield_enemy_formation_death_count(int filter_type)
+{
+    if (filter_type < 0) {
+        return total_enemy_formation_deaths;
+    }
+    if (filter_type < MAX_TRACKED_TYPES) {
+        return enemy_formation_deaths[filter_type];
+    }
+    return 0;
+}
+
+int battlefield_player_formation_death_count(int filter_type)
+{
+    if (filter_type < 0) {
+        return total_player_formation_deaths;
+    }
+    if (filter_type < MAX_TRACKED_TYPES) {
+        return player_formation_deaths[filter_type];
+    }
+    return 0;
 }

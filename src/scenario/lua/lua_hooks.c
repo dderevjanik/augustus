@@ -323,3 +323,43 @@ void scenario_lua_hook_on_combat(int attacker_type, int defender_type)
     }
     lua_settop(L, top);
 }
+
+static void call_lua_hook_with_int(const char *func_name, int value)
+{
+    lua_State *L = scenario_lua_get_state();
+    if (!L) {
+        return;
+    }
+    int top = lua_gettop(L);
+    lua_getglobal(L, func_name);
+    if (!lua_isfunction(L, -1)) {
+        lua_settop(L, top);
+        return;
+    }
+    lua_pushinteger(L, value);
+    if (lua_pcall(L, 1, 0, 0) != LUA_OK) {
+        log_error("Lua hook error in", func_name, 0);
+        log_error("  ", lua_tostring(L, -1), 0);
+    }
+    lua_settop(L, top);
+}
+
+void scenario_lua_hook_on_enemy_killed(int figure_type)
+{
+    call_lua_hook_with_int("on_enemy_killed", figure_type);
+}
+
+void scenario_lua_hook_on_player_killed(int figure_type)
+{
+    call_lua_hook_with_int("on_player_killed", figure_type);
+}
+
+void scenario_lua_hook_on_enemy_formation_destroyed(int figure_type)
+{
+    call_lua_hook_with_int("on_enemy_formation_destroyed", figure_type);
+}
+
+void scenario_lua_hook_on_player_formation_destroyed(int figure_type)
+{
+    call_lua_hook_with_int("on_player_formation_destroyed", figure_type);
+}

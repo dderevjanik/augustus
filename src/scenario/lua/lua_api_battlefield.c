@@ -345,18 +345,66 @@ static int l_battlefield_player_formation_count(lua_State *L)
     return 1;
 }
 
+// battlefield.enemy_death_count(figure_type?) -> integer
+static int l_battlefield_enemy_death_count(lua_State *L)
+{
+    int filter_type = -1;
+    if (lua_gettop(L) >= 1 && !lua_isnil(L, 1)) {
+        filter_type = (int) luaL_checkinteger(L, 1);
+    }
+    lua_pushinteger(L, battlefield_enemy_death_count(filter_type));
+    return 1;
+}
+
+// battlefield.player_death_count(figure_type?) -> integer
+static int l_battlefield_player_death_count(lua_State *L)
+{
+    int filter_type = -1;
+    if (lua_gettop(L) >= 1 && !lua_isnil(L, 1)) {
+        filter_type = (int) luaL_checkinteger(L, 1);
+    }
+    lua_pushinteger(L, battlefield_player_death_count(filter_type));
+    return 1;
+}
+
+// battlefield.enemy_formation_death_count(figure_type?) -> integer
+static int l_battlefield_enemy_formation_death_count(lua_State *L)
+{
+    int filter_type = -1;
+    if (lua_gettop(L) >= 1 && !lua_isnil(L, 1)) {
+        filter_type = (int) luaL_checkinteger(L, 1);
+    }
+    lua_pushinteger(L, battlefield_enemy_formation_death_count(filter_type));
+    return 1;
+}
+
+// battlefield.player_formation_death_count(figure_type?) -> integer
+static int l_battlefield_player_formation_death_count(lua_State *L)
+{
+    int filter_type = -1;
+    if (lua_gettop(L) >= 1 && !lua_isnil(L, 1)) {
+        filter_type = (int) luaL_checkinteger(L, 1);
+    }
+    lua_pushinteger(L, battlefield_player_formation_death_count(filter_type));
+    return 1;
+}
+
 static const luaL_Reg battlefield_funcs[] = {
     {"start",           l_battlefield_start},
     {"start_from_map",  l_battlefield_start_from_map},
     {"stop",            l_battlefield_stop},
     {"is_active",       l_battlefield_is_active},
     {"spawn_enemies",   l_battlefield_spawn_enemies},
-    {"win",                      l_battlefield_win},
-    {"lose",                     l_battlefield_lose},
-    {"enemy_count",              l_battlefield_enemy_count},
-    {"player_count",             l_battlefield_player_count},
-    {"enemy_formation_count",    l_battlefield_enemy_formation_count},
-    {"player_formation_count",   l_battlefield_player_formation_count},
+    {"win",                              l_battlefield_win},
+    {"lose",                             l_battlefield_lose},
+    {"enemy_count",                      l_battlefield_enemy_count},
+    {"player_count",                     l_battlefield_player_count},
+    {"enemy_formation_count",            l_battlefield_enemy_formation_count},
+    {"player_formation_count",           l_battlefield_player_formation_count},
+    {"enemy_death_count",                l_battlefield_enemy_death_count},
+    {"player_death_count",               l_battlefield_player_death_count},
+    {"enemy_formation_death_count",      l_battlefield_enemy_formation_death_count},
+    {"player_formation_death_count",     l_battlefield_player_formation_death_count},
     {NULL, NULL}
 };
 

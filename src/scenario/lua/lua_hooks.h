@@ -58,4 +58,16 @@ void scenario_lua_hook_on_god_angry(int god_id);
 /** Called when combat damage is dealt */
 void scenario_lua_hook_on_combat(int attacker_type, int defender_type);
 
+/** Called when an enemy figure is killed during battlefield mode */
+void scenario_lua_hook_on_enemy_killed(int figure_type);
+
+/** Called when a player (legion) figure is killed during battlefield mode */
+void scenario_lua_hook_on_player_killed(int figure_type);
+
+/** Called when an enemy formation is destroyed during battlefield mode */
+void scenario_lua_hook_on_enemy_formation_destroyed(int figure_type);
+
+/** Called when a player formation is destroyed during battlefield mode */
+void scenario_lua_hook_on_player_formation_destroyed(int figure_type);
+
 #endif // SCENARIO_LUA_HOOKS_H
