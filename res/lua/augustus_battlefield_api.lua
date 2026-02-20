@@ -162,6 +162,74 @@ function battlefield.enemy_formation_count(figure_type) end
 function battlefield.player_formation_count(figure_type) end
 
 ----------------------------------------------------------------
+-- Battlefield army iteration
+----------------------------------------------------------------
+
+--- Formation info table returned by enemy_armies() and player_armies().
+---@class formation_info
+---@field id integer Formation ID (use with formation_figures)
+---@field figure_type integer Figure type constant (see battlefield.FIGURE_TYPE.*)
+---@field num_figures integer Current number of alive figures in the formation
+---@field max_figures integer Maximum number of figures the formation can hold
+---@field x integer Current formation X position on the map
+---@field y integer Current formation Y position on the map
+---@field morale integer Formation morale (0-100+)
+---@field direction integer Formation facing direction
+---@field is_halted boolean Whether the formation is currently halted
+---@field layout integer Formation layout type
+
+--- Figure info table returned by formation_figures().
+---@class figure_info
+---@field id integer Figure ID
+---@field figure_type integer Figure type constant
+---@field x integer Figure X position on the map
+---@field y integer Figure Y position on the map
+---@field damage integer Current damage taken
+---@field action_state integer Current action state
+
+--- Get a list of all active enemy formations on the battlefield.
+--- Returns an array of formation info tables (only formations with alive figures).
+---
+--- ```lua
+--- local enemies = battlefield.enemy_armies()
+--- for _, army in ipairs(enemies) do
+---     print("Formation " .. army.id .. " at (" .. army.x .. "," .. army.y .. ") with " .. army.num_figures .. " soldiers")
+--- end
+--- ```
+---@return formation_info[] formations Array of enemy formation info tables
+function battlefield.enemy_armies() end
+
+--- Get a list of all active player (legion) formations on the battlefield.
+--- Returns an array of formation info tables (only formations with alive figures).
+---
+--- ```lua
+--- local legions = battlefield.player_armies()
+--- for _, army in ipairs(legions) do
+---     if army.num_figures < 5 then
+---         print("Legion " .. army.id .. " is running low on soldiers!")
+---     end
+--- end
+--- ```
+---@return formation_info[] formations Array of player formation info tables
+function battlefield.player_armies() end
+
+--- Get a list of all alive figures in a specific formation.
+--- Returns an array of figure info tables for each alive figure.
+---
+--- ```lua
+--- local enemies = battlefield.enemy_armies()
+--- for _, army in ipairs(enemies) do
+---     local figures = battlefield.formation_figures(army.id)
+---     for _, fig in ipairs(figures) do
+---         print("Figure " .. fig.id .. " at (" .. fig.x .. "," .. fig.y .. ") damage=" .. fig.damage)
+---     end
+--- end
+--- ```
+---@param formation_id integer The formation ID (from formation_info.id)
+---@return figure_info[] figures Array of figure info tables
+function battlefield.formation_figures(formation_id) end
+
+----------------------------------------------------------------
 -- Battlefield death counts
 ----------------------------------------------------------------
 

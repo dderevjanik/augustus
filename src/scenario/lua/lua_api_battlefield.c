@@ -389,6 +389,119 @@ static int l_battlefield_player_formation_death_count(lua_State *L)
     return 1;
 }
 
+// Helper: push a formation info table onto the Lua stack
+static void push_formation_table(lua_State *L, const formation *m)
+{
+    lua_createtable(L, 0, 10);
+
+    lua_pushinteger(L, m->id);
+    lua_setfield(L, -2, "id");
+
+    lua_pushinteger(L, m->figure_type);
+    lua_setfield(L, -2, "figure_type");
+
+    lua_pushinteger(L, m->num_figures);
+    lua_setfield(L, -2, "num_figures");
+
+    lua_pushinteger(L, m->max_figures);
+    lua_setfield(L, -2, "max_figures");
+
+    lua_pushinteger(L, m->x_home);
+    lua_setfield(L, -2, "x");
+
+    lua_pushinteger(L, m->y_home);
+    lua_setfield(L, -2, "y");
+
+    lua_pushinteger(L, m->morale);
+    lua_setfield(L, -2, "morale");
+
+    lua_pushinteger(L, m->direction);
+    lua_setfield(L, -2, "direction");
+
+    lua_pushboolean(L, m->is_halted);
+    lua_setfield(L, -2, "is_halted");
+
+    lua_pushinteger(L, m->layout);
+    lua_setfield(L, -2, "layout");
+}
+
+// battlefield.enemy_armies() -> array of formation tables
+static int l_battlefield_enemy_armies(lua_State *L)
+{
+    lua_newtable(L);
+    int idx = 1;
+    for (int i = 1; i < formation_count(); i++) {
+        formation *m = formation_get(i);
+        if (!m->in_use || m->is_legion || m->is_herd) continue;
+        if (m->num_figures <= 0) continue;
+        push_formation_table(L, m);
+        lua_rawseti(L, -2, idx++);
+    }
+    return 1;
+}
+
+// battlefield.player_armies() -> array of formation tables
+static int l_battlefield_player_armies(lua_State *L)
+{
+    lua_newtable(L);
+    int idx = 1;
+    for (int i = 1; i < formation_count(); i++) {
+        formation *m = formation_get(i);
+        if (!m->in_use || !m->is_legion) continue;
+        if (m->num_figures <= 0) continue;
+        push_formation_table(L, m);
+        lua_rawseti(L, -2, idx++);
+    }
+    return 1;
+}
+
+// battlefield.formation_figures(formation_id) -> array of figure tables
+// Returns info about each alive figure in the given formation.
+static int l_battlefield_formation_figures(lua_State *L)
+{
+    int formation_id = (int) luaL_checkinteger(L, 1);
+    if (formation_id < 1 || formation_id >= formation_count()) {
+        lua_newtable(L);
+        return 1;
+    }
+    formation *m = formation_get(formation_id);
+    if (!m->in_use) {
+        lua_newtable(L);
+        return 1;
+    }
+
+    lua_newtable(L);
+    int idx = 1;
+    for (int i = 0; i < m->num_figures; i++) {
+        if (m->figures[i] <= 0) continue;
+        figure *f = figure_get(m->figures[i]);
+        if (figure_is_dead(f)) continue;
+
+        lua_createtable(L, 0, 6);
+
+        lua_pushinteger(L, f->id);
+        lua_setfield(L, -2, "id");
+
+        lua_pushinteger(L, f->type);
+        lua_setfield(L, -2, "figure_type");
+
+        lua_pushinteger(L, f->x);
+        lua_setfield(L, -2, "x");
+
+        lua_pushinteger(L, f->y);
+        lua_setfield(L, -2, "y");
+
+        lua_pushinteger(L, f->damage);
+        lua_setfield(L, -2, "damage");
+
+        lua_pushinteger(L, f->action_state);
+        lua_setfield(L, -2, "action_state");
+
+        lua_rawseti(L, -2, idx++);
+    }
+    return 1;
+}
+
 static const luaL_Reg battlefield_funcs[] = {
     {"start",           l_battlefield_start},
     {"start_from_map",  l_battlefield_start_from_map},
@@ -405,6 +518,9 @@ static const luaL_Reg battlefield_funcs[] = {
     {"player_death_count",               l_battlefield_player_death_count},
     {"enemy_formation_death_count",      l_battlefield_enemy_formation_death_count},
     {"player_formation_death_count",     l_battlefield_player_formation_death_count},
+    {"enemy_armies",                     l_battlefield_enemy_armies},
+    {"player_armies",                    l_battlefield_player_armies},
+    {"formation_figures",                l_battlefield_formation_figures},
     {NULL, NULL}
 };
 
