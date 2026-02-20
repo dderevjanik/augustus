@@ -1,0 +1,156 @@
+---@meta augustus_battlefield
+-- Augustus Lua Scripting API - Battlefield API
+-- Place this file in your workspace for IDE autocomplete. Do NOT load it in scripts.
+
+----------------------------------------------------------------
+-- battlefield.*  –  Battlefield mode control
+----------------------------------------------------------------
+
+---@class battlefield
+battlefield = {}
+
+--- Army configuration for battlefield.start.
+---@class battlefield_army
+---@field figure_type? integer Figure type constant (default: legionary for player, barbarian sword for enemy)
+---@field count? integer Number of formations to create (default: 2)
+---@field soldiers? integer Soldiers per formation (default: 16)
+---@field x? integer Spawn X position on the map (default: 20 for player, 60 for enemy)
+---@field y? integer Spawn Y position of the first formation (default: 36)
+---@field y_spacing? integer Vertical spacing between formations (default: 8)
+
+--- Battlefield configuration table.
+---@class battlefield_config
+---@field enemy_id? integer Enemy graphics set (default: 0 = barbarian). See battlefield.ENEMY_TYPE.*
+---@field player_armies? battlefield_army[] Array of player army groups
+---@field enemy_armies? battlefield_army[] Array of enemy army groups
+
+--- Start a battlefield battle. Saves the current scenario, creates a flat 80x80 map,
+--- and spawns the configured armies. The previous scenario is restored when the
+--- battle ends (victory or manual stop).
+---
+--- When called with no arguments, uses default armies (2 legions vs 2 barbarian formations).
+--- Pass a config table to customize armies:
+---
+--- ```lua
+--- battlefield.start({
+---     enemy_id = battlefield.ENEMY_TYPE.GAUL,
+---     player_armies = {
+---         { figure_type = battlefield.FIGURE_TYPE.LEGIONARY, count = 3, soldiers = 16, x = 15, y = 30, y_spacing = 10 },
+---         { figure_type = battlefield.FIGURE_TYPE.JAVELIN,   count = 1, soldiers = 12, x = 10, y = 50 },
+---     },
+---     enemy_armies = {
+---         { figure_type = battlefield.FIGURE_TYPE.ENEMY_FAST_SWORD, count = 2, soldiers = 20, x = 65, y = 30 },
+---         { figure_type = battlefield.FIGURE_TYPE.ENEMY_SPEAR,      count = 2, soldiers = 16, x = 70, y = 50 },
+---     },
+--- })
+--- ```
+---@param config? battlefield_config
+function battlefield.start(config) end
+
+--- Start a battlefield battle using an existing map file as terrain.
+--- Loads the specified file (.svx, .sav, .map, or .mapx), strips all buildings
+--- and figures, keeps the terrain, and spawns battlefield armies.
+--- The previous scenario is saved and will be restored when the battle ends.
+---
+--- Pass an optional config table (same format as battlefield.start) to customize armies.
+--- If omitted, default armies are used.
+---
+--- ```lua
+--- -- With defaults:
+--- battlefield.start_from_map("path/to/map.svx")
+---
+--- -- With custom config:
+--- battlefield.start_from_map("path/to/map.svx", {
+---     enemy_id = battlefield.ENEMY_TYPE.GAUL,
+---     player_armies = {
+---         { figure_type = battlefield.FIGURE_TYPE.LEGIONARY, count = 2, soldiers = 16, x = 20, y = 30 },
+---     },
+---     enemy_armies = {
+---         { figure_type = battlefield.FIGURE_TYPE.ENEMY_FAST_SWORD, count = 3, soldiers = 16, x = 60, y = 30 },
+---     },
+--- })
+--- ```
+---@param filename string Path to the map file to load
+---@param config? battlefield_config Optional army configuration
+function battlefield.start_from_map(filename, config) end
+
+--- Stop an active battlefield and restore the previously saved scenario.
+function battlefield.stop() end
+
+--- Check whether a battlefield battle is currently active.
+---@return boolean is_active
+function battlefield.is_active() end
+
+--- Spawn additional enemy formations on an active battlefield.
+--- The battlefield must be active (started via battlefield.start or battlefield.start_from_map).
+--- Uses the same army table format as the armies in battlefield_config.
+---
+--- ```lua
+--- battlefield.spawn_enemies({
+---     figure_type = battlefield.FIGURE_TYPE.ENEMY_FAST_SWORD,
+---     count = 2,       -- number of formations
+---     soldiers = 12,   -- soldiers per formation
+---     x = 55,          -- map x position
+---     y = 20,          -- map y position
+---     y_spacing = 6,   -- vertical spacing between formations
+--- })
+--- ```
+---@param army battlefield_army Army group to spawn
+---@return boolean success Whether the enemies were spawned successfully
+function battlefield.spawn_enemies(army) end
+
+--- End the battlefield with a victory.
+--- Fires the `on_victory()` hook on the battlefield Lua script (if defined),
+--- then destroys the battlefield script and restores the previous scenario.
+--- Deferred to the next tick so it is safe to call from inside a Lua callback.
+function battlefield.win() end
+
+--- End the battlefield with a defeat.
+--- Fires the `on_defeat()` hook on the battlefield Lua script (if defined),
+--- then destroys the battlefield script and restores the previous scenario.
+--- Deferred to the next tick so it is safe to call from inside a Lua callback.
+function battlefield.lose() end
+
+----------------------------------------------------------------
+-- Battlefield constants
+----------------------------------------------------------------
+
+--- Player figure type constants for battlefield armies
+---@class battlefield_FIGURE_TYPE
+battlefield.FIGURE_TYPE = {
+    LEGIONARY            = 13, -- FIGURE_FORT_LEGIONARY
+    JAVELIN              = 11, -- FIGURE_FORT_JAVELIN
+    MOUNTED              = 12, -- FIGURE_FORT_MOUNTED
+    INFANTRY             = 92, -- FIGURE_FORT_INFANTRY
+    ARCHER               = 94, -- FIGURE_FORT_ARCHER
+    -- Enemy figure types
+    ENEMY_SPEAR          = 43, -- FIGURE_ENEMY43_SPEAR
+    ENEMY_SWORD          = 44, -- FIGURE_ENEMY44_SWORD
+    ENEMY_SWORD_2        = 45, -- FIGURE_ENEMY45_SWORD
+    ENEMY_CAMEL          = 46, -- FIGURE_ENEMY46_CAMEL
+    ENEMY_ELEPHANT       = 47, -- FIGURE_ENEMY47_ELEPHANT
+    ENEMY_CHARIOT        = 48, -- FIGURE_ENEMY48_CHARIOT
+    ENEMY_FAST_SWORD     = 49, -- FIGURE_ENEMY49_FAST_SWORD
+    ENEMY_SWORD_3        = 50, -- FIGURE_ENEMY50_SWORD
+    ENEMY_SPEAR_2        = 51, -- FIGURE_ENEMY51_SPEAR
+    ENEMY_MOUNTED_ARCHER = 52, -- FIGURE_ENEMY52_MOUNTED_ARCHER
+    ENEMY_AXE            = 53, -- FIGURE_ENEMY53_AXE
+    ENEMY_GLADIATOR      = 54, -- FIGURE_ENEMY54_GLADIATOR
+}
+
+--- Enemy graphics set constants (controls which enemy sprite sheet is loaded)
+---@class battlefield_ENEMY_TYPE
+battlefield.ENEMY_TYPE = {
+    BARBARIAN    = 0,
+    NUMIDIAN     = 1,
+    GAUL         = 2,
+    CELT         = 3,
+    GOTH         = 4,
+    PERGAMUM     = 5,
+    SELEUCID     = 6,
+    ETRUSCAN     = 7,
+    GREEK        = 8,
+    EGYPTIAN     = 9,
+    CARTHAGINIAN = 10,
+    CAESAR       = 11,
+}

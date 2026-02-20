@@ -597,6 +597,7 @@ set(SCENARIO_FILES
     ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_state.c
     ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_hooks.c
     ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_game.c
+    ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_battlefield.c
     ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_city.c
     ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_finance.c
     ${PROJECT_SOURCE_DIR}/src/scenario/lua/lua_api_scenario.c

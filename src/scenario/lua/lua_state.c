@@ -22,6 +22,7 @@ void lua_api_resource_register(lua_State *L);
 void lua_api_population_register(lua_State *L);
 void lua_api_sound_register(lua_State *L);
 void lua_api_empire_register(lua_State *L);
+void lua_api_battlefield_register(lua_State *L);
 // Forward declaration for clearing custom handlers
 void lua_api_scenario_clear_handlers(void);
 
@@ -41,6 +42,7 @@ static void register_all_apis(lua_State *L)
     lua_api_population_register(L);
     lua_api_sound_register(L);
     lua_api_empire_register(L);
+    lua_api_battlefield_register(L);
 }
 
 int scenario_lua_load_script(const char *scenario_file)
