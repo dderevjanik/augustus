@@ -49,5 +49,6 @@ int battlefield_is_active(void);
 int battlefield_should_stop(void);
 void battlefield_check_completion(void);
 void battlefield_process_pending_lua(void);
+int battlefield_spawn_enemies(figure_type type, int count, int soldiers, int x, int y, int y_spacing);
 
 #endif // GAME_BATTLEFIELD_H

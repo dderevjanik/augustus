@@ -289,6 +289,30 @@ static int l_game_battlefield_is_active(lua_State *L)
     return 1;
 }
 
+// game.battlefield_spawn_enemies(army_table) -> boolean
+// army_table fields: figure_type, count, soldiers, x, y, y_spacing
+static int l_game_battlefield_spawn_enemies(lua_State *L)
+{
+    luaL_checktype(L, 1, LUA_TTABLE);
+
+    battlefield_army army;
+    memset(&army, 0, sizeof(army));
+
+    // Parse using the same field names as battlefield_start config
+    parse_army_table(L, 1, &army,
+        BATTLEFIELD_DEFAULT_ENEMY_X,
+        BATTLEFIELD_DEFAULT_ENEMY_Y,
+        BATTLEFIELD_DEFAULT_ENEMY_Y_SPACING,
+        BATTLEFIELD_DEFAULT_ENEMIES_PER_FORMATION,
+        FIGURE_ENEMY49_FAST_SWORD);
+
+    int result = battlefield_spawn_enemies(
+        army.figure_type, army.count, army.soldiers,
+        army.x, army.y, army.y_spacing);
+    lua_pushboolean(L, result);
+    return 1;
+}
+
 static const luaL_Reg game_funcs[] = {
     {"year", l_game_year},
     {"month", l_game_month},
@@ -304,6 +328,7 @@ static const luaL_Reg game_funcs[] = {
     {"battlefield_start_from_map",  l_game_battlefield_start_from_map},
     {"battlefield_stop",           l_game_battlefield_stop},
     {"battlefield_is_active",      l_game_battlefield_is_active},
+    {"battlefield_spawn_enemies",  l_game_battlefield_spawn_enemies},
     {NULL, NULL}
 };
 

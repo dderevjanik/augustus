@@ -120,6 +120,24 @@ function game.battlefield_stop() end
 ---@return boolean is_active
 function game.battlefield_is_active() end
 
+--- Spawn additional enemy formations on an active battlefield.
+--- The battlefield must be active (started via battlefield_start or battlefield_start_from_map).
+--- Uses the same army table format as the armies in battlefield_config.
+---
+--- ```lua
+--- game.battlefield_spawn_enemies({
+---     figure_type = game.FIGURE_TYPE.ENEMY_FAST_SWORD,
+---     count = 2,       -- number of formations
+---     soldiers = 12,   -- soldiers per formation
+---     x = 55,          -- map x position
+---     y = 20,          -- map y position
+---     y_spacing = 6,   -- vertical spacing between formations
+--- })
+--- ```
+---@param army battlefield_army Army group to spawn
+---@return boolean success Whether the enemies were spawned successfully
+function game.battlefield_spawn_enemies(army) end
+
 ----------------------------------------------------------------
 -- Battlefield constants
 ----------------------------------------------------------------

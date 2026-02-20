@@ -514,3 +514,21 @@ void battlefield_start_from_map(const char *filename, const battlefield_config *
 
     terminal_add_line("[battlefield] Battlefield active (loaded from map).");
 }
+
+int battlefield_spawn_enemies(figure_type type, int count, int soldiers, int x, int y, int y_spacing)
+{
+    if (!is_active) {
+        log_error("Battlefield: cannot spawn enemies — battlefield not active", 0, 0);
+        return 0;
+    }
+    battlefield_army army;
+    army.figure_type = type;
+    army.count = count;
+    army.soldiers = soldiers;
+    army.x = x;
+    army.y = y;
+    army.y_spacing = y_spacing;
+    spawn_enemy_formation(&army, scenario_property_enemy());
+    formation_calculate_figures();
+    return 1;
+}
