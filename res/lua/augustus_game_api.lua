@@ -138,6 +138,18 @@ function game.battlefield_is_active() end
 ---@return boolean success Whether the enemies were spawned successfully
 function game.battlefield_spawn_enemies(army) end
 
+--- End the battlefield with a victory.
+--- Fires the `on_victory()` hook on the battlefield Lua script (if defined),
+--- then destroys the battlefield script and restores the previous scenario.
+--- Deferred to the next tick so it is safe to call from inside a Lua callback.
+function game.battlefield_win() end
+
+--- End the battlefield with a defeat.
+--- Fires the `on_defeat()` hook on the battlefield Lua script (if defined),
+--- then destroys the battlefield script and restores the previous scenario.
+--- Deferred to the next tick so it is safe to call from inside a Lua callback.
+function game.battlefield_lose() end
+
 ----------------------------------------------------------------
 -- Battlefield constants
 ----------------------------------------------------------------
@@ -145,24 +157,24 @@ function game.battlefield_spawn_enemies(army) end
 --- Player figure type constants for battlefield armies
 ---@class game_FIGURE_TYPE
 game.FIGURE_TYPE = {
-    LEGIONARY            = 13,  -- FIGURE_FORT_LEGIONARY
-    JAVELIN              = 11,  -- FIGURE_FORT_JAVELIN
-    MOUNTED              = 12,  -- FIGURE_FORT_MOUNTED
-    INFANTRY             = 92,  -- FIGURE_FORT_INFANTRY
-    ARCHER               = 94,  -- FIGURE_FORT_ARCHER
+    LEGIONARY            = 13, -- FIGURE_FORT_LEGIONARY
+    JAVELIN              = 11, -- FIGURE_FORT_JAVELIN
+    MOUNTED              = 12, -- FIGURE_FORT_MOUNTED
+    INFANTRY             = 92, -- FIGURE_FORT_INFANTRY
+    ARCHER               = 94, -- FIGURE_FORT_ARCHER
     -- Enemy figure types
-    ENEMY_SPEAR          = 43,  -- FIGURE_ENEMY43_SPEAR
-    ENEMY_SWORD          = 44,  -- FIGURE_ENEMY44_SWORD
-    ENEMY_SWORD_2        = 45,  -- FIGURE_ENEMY45_SWORD
-    ENEMY_CAMEL          = 46,  -- FIGURE_ENEMY46_CAMEL
-    ENEMY_ELEPHANT       = 47,  -- FIGURE_ENEMY47_ELEPHANT
-    ENEMY_CHARIOT        = 48,  -- FIGURE_ENEMY48_CHARIOT
-    ENEMY_FAST_SWORD     = 49,  -- FIGURE_ENEMY49_FAST_SWORD
-    ENEMY_SWORD_3        = 50,  -- FIGURE_ENEMY50_SWORD
-    ENEMY_SPEAR_2        = 51,  -- FIGURE_ENEMY51_SPEAR
-    ENEMY_MOUNTED_ARCHER = 52,  -- FIGURE_ENEMY52_MOUNTED_ARCHER
-    ENEMY_AXE            = 53,  -- FIGURE_ENEMY53_AXE
-    ENEMY_GLADIATOR      = 54,  -- FIGURE_ENEMY54_GLADIATOR
+    ENEMY_SPEAR          = 43, -- FIGURE_ENEMY43_SPEAR
+    ENEMY_SWORD          = 44, -- FIGURE_ENEMY44_SWORD
+    ENEMY_SWORD_2        = 45, -- FIGURE_ENEMY45_SWORD
+    ENEMY_CAMEL          = 46, -- FIGURE_ENEMY46_CAMEL
+    ENEMY_ELEPHANT       = 47, -- FIGURE_ENEMY47_ELEPHANT
+    ENEMY_CHARIOT        = 48, -- FIGURE_ENEMY48_CHARIOT
+    ENEMY_FAST_SWORD     = 49, -- FIGURE_ENEMY49_FAST_SWORD
+    ENEMY_SWORD_3        = 50, -- FIGURE_ENEMY50_SWORD
+    ENEMY_SPEAR_2        = 51, -- FIGURE_ENEMY51_SPEAR
+    ENEMY_MOUNTED_ARCHER = 52, -- FIGURE_ENEMY52_MOUNTED_ARCHER
+    ENEMY_AXE            = 53, -- FIGURE_ENEMY53_AXE
+    ENEMY_GLADIATOR      = 54, -- FIGURE_ENEMY54_GLADIATOR
 }
 
 --- Enemy graphics set constants (controls which enemy sprite sheet is loaded)

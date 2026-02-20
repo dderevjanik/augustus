@@ -54,7 +54,7 @@
 
 static int is_active;
 static int has_backup;
-static int pending_stop;
+static int pending_stop; // 0 = none, 1 = win, 2 = lose
 static int pending_lua_reload;
 static char original_lua_source[300]; // scenario file for original Lua script restoration
 static char battlefield_lua_source[300]; // scenario/map file for battlefield Lua script
@@ -92,9 +92,16 @@ int battlefield_is_active(void)
 
 void battlefield_stop(void)
 {
+    int outcome = pending_stop;
     is_active = 0;
     pending_stop = 0;
     pending_lua_reload = 0;
+    // Fire victory/defeat hook on the battlefield Lua before shutting it down
+    if (outcome == 1) {
+        scenario_lua_hook_on_victory();
+    } else if (outcome == 2) {
+        scenario_lua_hook_on_defeat();
+    }
     // Shut down any battlefield Lua state before restoring
     scenario_lua_shutdown();
     if (has_backup) {
@@ -118,7 +125,7 @@ void battlefield_stop(void)
 
 int battlefield_should_stop(void)
 {
-    return pending_stop;
+    return pending_stop != 0;
 }
 
 void battlefield_process_pending_lua(void)
@@ -142,8 +149,26 @@ void battlefield_check_completion(void)
     }
     if (enemy_army_total_enemy_formations() <= 0) {
         terminal_add_line("[battlefield] Victory! All enemies defeated.");
-        pending_stop = 1;
+        pending_stop = 1; // win
     }
+}
+
+void battlefield_win(void)
+{
+    if (!is_active) {
+        return;
+    }
+    terminal_add_line("[battlefield] Win triggered.");
+    pending_stop = 1;
+}
+
+void battlefield_lose(void)
+{
+    if (!is_active) {
+        return;
+    }
+    terminal_add_line("[battlefield] Defeat triggered.");
+    pending_stop = 2;
 }
 
 static void clear_battlefield_data(void)

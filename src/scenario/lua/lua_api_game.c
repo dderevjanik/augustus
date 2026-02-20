@@ -313,6 +313,20 @@ static int l_game_battlefield_spawn_enemies(lua_State *L)
     return 1;
 }
 
+// game.battlefield_win()
+static int l_game_battlefield_win(lua_State *L)
+{
+    battlefield_win();
+    return 0;
+}
+
+// game.battlefield_lose()
+static int l_game_battlefield_lose(lua_State *L)
+{
+    battlefield_lose();
+    return 0;
+}
+
 static const luaL_Reg game_funcs[] = {
     {"year", l_game_year},
     {"month", l_game_month},
@@ -329,6 +343,8 @@ static const luaL_Reg game_funcs[] = {
     {"battlefield_stop",           l_game_battlefield_stop},
     {"battlefield_is_active",      l_game_battlefield_is_active},
     {"battlefield_spawn_enemies",  l_game_battlefield_spawn_enemies},
+    {"battlefield_win",            l_game_battlefield_win},
+    {"battlefield_lose",           l_game_battlefield_lose},
     {NULL, NULL}
 };
 
