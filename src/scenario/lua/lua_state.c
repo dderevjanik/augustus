@@ -26,6 +26,7 @@ void lua_api_empire_register(lua_State *L);
 void lua_api_scenario_clear_handlers(void);
 
 static lua_State *global_lua_state = 0;
+static char current_script_source[300]; // scenario file used to derive the .lua script
 
 static void register_all_apis(lua_State *L)
 {
@@ -108,6 +109,8 @@ int scenario_lua_load_script(const char *scenario_file)
     }
 
     log_info("Lua script loaded:", full_path, 0);
+    strncpy(current_script_source, scenario_file, sizeof(current_script_source) - 1);
+    current_script_source[sizeof(current_script_source) - 1] = '\0';
     return 1;
 }
 
@@ -117,7 +120,13 @@ void scenario_lua_shutdown(void)
         lua_close(global_lua_state);
         global_lua_state = 0;
     }
+    current_script_source[0] = '\0';
     lua_api_scenario_clear_handlers();
+}
+
+const char *scenario_lua_get_current_source(void)
+{
+    return current_script_source;
 }
 
 int scenario_lua_is_active(void)

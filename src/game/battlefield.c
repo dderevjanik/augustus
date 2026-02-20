@@ -45,6 +45,8 @@
 #include "scenario/map.h"
 #include "scenario/property.h"
 #include "scenario/scenario.h"
+#include "scenario/lua/lua_hooks.h"
+#include "scenario/lua/lua_state.h"
 #include "sound/city.h"
 #include "window/city.h"
 
@@ -53,6 +55,9 @@
 static int is_active;
 static int has_backup;
 static int pending_stop;
+static int pending_lua_reload;
+static char original_lua_source[300]; // scenario file for original Lua script restoration
+static char battlefield_lua_source[300]; // scenario/map file for battlefield Lua script
 
 static const char BACKUP_FILENAME[] = "battlefield-backup.svx";
 
@@ -63,8 +68,14 @@ static void save_backup(void)
         has_backup = 0;
         terminal_add_line("[battlefield] Started from editor — no backup (cannot auto-restore).");
         return;
-    }
-    const char *path = dir_append_location(BACKUP_FILENAME, PATH_LOCATION_SAVEGAME);
+    }    // Save original Lua script source for restoration after battlefield stops
+    const char *lua_src = scenario_lua_get_current_source();
+    if (lua_src && lua_src[0]) {
+        strncpy(original_lua_source, lua_src, sizeof(original_lua_source) - 1);
+        original_lua_source[sizeof(original_lua_source) - 1] = '\0';
+    } else {
+        original_lua_source[0] = '\0';
+    }    const char *path = dir_append_location(BACKUP_FILENAME, PATH_LOCATION_SAVEGAME);
     if (game_file_write_saved_game(path)) {
         has_backup = 1;
         terminal_add_line("[battlefield] Scenario saved for later restoration.");
@@ -83,21 +94,45 @@ void battlefield_stop(void)
 {
     is_active = 0;
     pending_stop = 0;
+    pending_lua_reload = 0;
+    // Shut down any battlefield Lua state before restoring
+    scenario_lua_shutdown();
     if (has_backup) {
         has_backup = 0;
         terminal_add_line("[battlefield] Restoring previous scenario...");
         const char *path = dir_append_location(BACKUP_FILENAME, PATH_LOCATION_SAVEGAME);
         if (game_file_load_saved_game(path) == 1) {
             terminal_add_line("[battlefield] Scenario restored.");
+            // Reload original Lua script
+            if (original_lua_source[0]) {
+                scenario_lua_load_script(original_lua_source);
+                scenario_lua_hook_on_load();
+            }
         } else {
             terminal_add_line("[error] Failed to restore scenario from backup.");
         }
     }
+    original_lua_source[0] = '\0';
+    battlefield_lua_source[0] = '\0';
 }
 
 int battlefield_should_stop(void)
 {
     return pending_stop;
+}
+
+void battlefield_process_pending_lua(void)
+{
+    if (!pending_lua_reload) {
+        return;
+    }
+    pending_lua_reload = 0;
+    // Safe to shut down Lua here — we are in game_tick_run, not inside a Lua callback
+    scenario_lua_shutdown();
+    if (battlefield_lua_source[0]) {
+        scenario_lua_load_script(battlefield_lua_source);
+        scenario_lua_hook_on_load();
+    }
 }
 
 void battlefield_check_completion(void)
@@ -116,7 +151,7 @@ static void clear_battlefield_data(void)
     // NOTE: Do NOT call scenario_lua_shutdown() here.
     // battlefield_start may be called from a Lua callback (e.g. input dialog button),
     // and destroying the Lua state mid-execution causes a segfault.
-    // The Lua state will be properly restored when battlefield_stop() loads the backup save.
+    // Lua shutdown is deferred to battlefield_process_pending_lua(), called on the next tick.
 
     city_victory_reset();
     building_construction_clear_type();
@@ -300,7 +335,11 @@ void battlefield_start_configured(const battlefield_config *config)
     // 6. Activate battlefield mode
     is_active = 1;
 
-    // 7. Set up view and unpause
+    // 7. Defer Lua reload — no map-specific Lua for generated flat maps
+    battlefield_lua_source[0] = '\0';
+    pending_lua_reload = 1;
+
+    // 8. Set up view and unpause
     city_view_init();
     game_state_unpause();
     window_city_show();
@@ -463,6 +502,12 @@ void battlefield_start_from_map(const char *filename, const battlefield_config *
 
     // Activate
     is_active = 1;
+
+    // Defer Lua reload — load script associated with the battlefield map file
+    strncpy(battlefield_lua_source, filename, sizeof(battlefield_lua_source) - 1);
+    battlefield_lua_source[sizeof(battlefield_lua_source) - 1] = '\0';
+    pending_lua_reload = 1;
+
     city_view_init();
     game_state_unpause();
     window_city_show();

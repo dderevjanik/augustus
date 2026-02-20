@@ -37,4 +37,11 @@ lua_State *scenario_lua_get_state(void);
  */
 int scenario_lua_ensure_state(void);
 
+/**
+ * Returns the scenario file that was used to load the current Lua script.
+ * For example, if the script was loaded from "Valentia.map", returns "Valentia.map".
+ * Returns an empty string if no script has been loaded.
+ */
+const char *scenario_lua_get_current_source(void);
+
 #endif // SCENARIO_LUA_STATE_H

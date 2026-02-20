@@ -208,6 +208,8 @@ void game_tick_run(void)
         return;
     }
     if (battlefield_is_active()) {
+        // Process deferred Lua reload (safe here — not inside a Lua callback)
+        battlefield_process_pending_lua();
         random_generate_next();
         // Run only formation/combat-relevant ticks
         switch (game_time_tick()) {

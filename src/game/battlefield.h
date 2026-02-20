@@ -48,5 +48,6 @@ void battlefield_stop(void);
 int battlefield_is_active(void);
 int battlefield_should_stop(void);
 void battlefield_check_completion(void);
+void battlefield_process_pending_lua(void);
 
 #endif // GAME_BATTLEFIELD_H
