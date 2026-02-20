@@ -201,6 +201,80 @@ static int l_game_battlefield_start(lua_State *L)
     return 0;
 }
 
+// game.battlefield_start_from_map(filename, config?)
+// Loads an existing map file (.svx, .sav, .map, .mapx) and starts battlefield on it.
+// Optional second argument is a config table (same format as battlefield_start).
+static int l_game_battlefield_start_from_map(lua_State *L)
+{
+    const char *filename = luaL_checkstring(L, 1);
+
+    if (lua_gettop(L) >= 2 && lua_istable(L, 2)) {
+        battlefield_config config;
+        memset(&config, 0, sizeof(config));
+
+        lua_getfield(L, 2, "enemy_id");
+        config.enemy_id = lua_isnil(L, -1) ? 0 : (int) lua_tointeger(L, -1);
+        lua_pop(L, 1);
+
+        lua_getfield(L, 2, "player_armies");
+        if (lua_istable(L, -1)) {
+            int n = (int) lua_rawlen(L, -1);
+            if (n > BATTLEFIELD_MAX_ARMIES) n = BATTLEFIELD_MAX_ARMIES;
+            config.player_army_count = n;
+            for (int i = 1; i <= n; i++) {
+                lua_rawgeti(L, -1, i);
+                parse_army_table(L, lua_gettop(L), &config.player_armies[i - 1],
+                    BATTLEFIELD_DEFAULT_PLAYER_X,
+                    BATTLEFIELD_DEFAULT_PLAYER_Y + (i - 1) * BATTLEFIELD_DEFAULT_PLAYER_Y_SPACING,
+                    BATTLEFIELD_DEFAULT_PLAYER_Y_SPACING,
+                    BATTLEFIELD_DEFAULT_SOLDIERS_PER_LEGION,
+                    FIGURE_FORT_LEGIONARY);
+                lua_pop(L, 1);
+            }
+        } else {
+            config.player_army_count = 1;
+            config.player_armies[0].figure_type = FIGURE_FORT_LEGIONARY;
+            config.player_armies[0].count = BATTLEFIELD_DEFAULT_LEGION_COUNT;
+            config.player_armies[0].soldiers = BATTLEFIELD_DEFAULT_SOLDIERS_PER_LEGION;
+            config.player_armies[0].x = BATTLEFIELD_DEFAULT_PLAYER_X;
+            config.player_armies[0].y = BATTLEFIELD_DEFAULT_PLAYER_Y;
+            config.player_armies[0].y_spacing = BATTLEFIELD_DEFAULT_PLAYER_Y_SPACING;
+        }
+        lua_pop(L, 1);
+
+        lua_getfield(L, 2, "enemy_armies");
+        if (lua_istable(L, -1)) {
+            int n = (int) lua_rawlen(L, -1);
+            if (n > BATTLEFIELD_MAX_ARMIES) n = BATTLEFIELD_MAX_ARMIES;
+            config.enemy_army_count = n;
+            for (int i = 1; i <= n; i++) {
+                lua_rawgeti(L, -1, i);
+                parse_army_table(L, lua_gettop(L), &config.enemy_armies[i - 1],
+                    BATTLEFIELD_DEFAULT_ENEMY_X,
+                    BATTLEFIELD_DEFAULT_ENEMY_Y + (i - 1) * BATTLEFIELD_DEFAULT_ENEMY_Y_SPACING,
+                    BATTLEFIELD_DEFAULT_ENEMY_Y_SPACING,
+                    BATTLEFIELD_DEFAULT_ENEMIES_PER_FORMATION,
+                    FIGURE_ENEMY49_FAST_SWORD);
+                lua_pop(L, 1);
+            }
+        } else {
+            config.enemy_army_count = 1;
+            config.enemy_armies[0].figure_type = FIGURE_ENEMY49_FAST_SWORD;
+            config.enemy_armies[0].count = BATTLEFIELD_DEFAULT_ENEMY_FORMATION_COUNT;
+            config.enemy_armies[0].soldiers = BATTLEFIELD_DEFAULT_ENEMIES_PER_FORMATION;
+            config.enemy_armies[0].x = BATTLEFIELD_DEFAULT_ENEMY_X;
+            config.enemy_armies[0].y = BATTLEFIELD_DEFAULT_ENEMY_Y;
+            config.enemy_armies[0].y_spacing = BATTLEFIELD_DEFAULT_ENEMY_Y_SPACING;
+        }
+        lua_pop(L, 1);
+
+        battlefield_start_from_map(filename, &config);
+    } else {
+        battlefield_start_from_map(filename, 0);
+    }
+    return 0;
+}
+
 // game.battlefield_stop()
 static int l_game_battlefield_stop(lua_State *L)
 {
@@ -226,9 +300,10 @@ static const luaL_Reg game_funcs[] = {
     {"lose", l_game_lose},
     {"api_version", l_game_api_version},
     // Battlefield
-    {"battlefield_start",     l_game_battlefield_start},
-    {"battlefield_stop",      l_game_battlefield_stop},
-    {"battlefield_is_active", l_game_battlefield_is_active},
+    {"battlefield_start",          l_game_battlefield_start},
+    {"battlefield_start_from_map",  l_game_battlefield_start_from_map},
+    {"battlefield_stop",           l_game_battlefield_stop},
+    {"battlefield_is_active",      l_game_battlefield_is_active},
     {NULL, NULL}
 };
 

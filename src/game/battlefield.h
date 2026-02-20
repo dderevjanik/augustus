@@ -43,6 +43,7 @@ typedef struct {
 
 void battlefield_start(void);
 void battlefield_start_configured(const battlefield_config *config);
+void battlefield_start_from_map(const char *filename, const battlefield_config *config);
 void battlefield_stop(void);
 int battlefield_is_active(void);
 int battlefield_should_stop(void);

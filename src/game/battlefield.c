@@ -20,8 +20,10 @@
 #include "figure/route.h"
 #include "figure/visited_buildings.h"
 #include "core/dir.h"
+#include "editor/editor.h"
 #include "game/animation.h"
 #include "game/file.h"
+#include "game/file_io.h"
 #include "game/state.h"
 #include "game/time.h"
 #include "map/aqueduct.h"
@@ -53,6 +55,24 @@ static int has_backup;
 static int pending_stop;
 
 static const char BACKUP_FILENAME[] = "battlefield-backup.svx";
+
+static void save_backup(void)
+{
+    if (editor_is_active()) {
+        // Editor state cannot be saved as a regular .svx savegame
+        has_backup = 0;
+        terminal_add_line("[battlefield] Started from editor — no backup (cannot auto-restore).");
+        return;
+    }
+    const char *path = dir_append_location(BACKUP_FILENAME, PATH_LOCATION_SAVEGAME);
+    if (game_file_write_saved_game(path)) {
+        has_backup = 1;
+        terminal_add_line("[battlefield] Scenario saved for later restoration.");
+    } else {
+        has_backup = 0;
+        terminal_add_line("[warning] Could not save scenario backup.");
+    }
+}
 
 int battlefield_is_active(void)
 {
@@ -231,14 +251,7 @@ void battlefield_start_configured(const battlefield_config *config)
     terminal_add_line("[battlefield] Starting battlefield mode...");
 
     // 0. Save current game state for later restoration
-    const char *path = dir_append_location(BACKUP_FILENAME, PATH_LOCATION_SAVEGAME);
-    if (game_file_write_saved_game(path)) {
-        has_backup = 1;
-        terminal_add_line("[battlefield] Scenario saved for later restoration.");
-    } else {
-        has_backup = 0;
-        terminal_add_line("[warning] Could not save scenario backup.");
-    }
+    save_backup();
 
     // 1. Clear all game state
     clear_battlefield_data();
@@ -299,4 +312,160 @@ void battlefield_start(void)
 {
     battlefield_config config = default_config();
     battlefield_start_configured(&config);
+}
+
+static int has_extension(const char *filename, const char *ext)
+{
+    size_t flen = strlen(filename);
+    size_t elen = strlen(ext);
+    if (flen < elen) {
+        return 0;
+    }
+    for (size_t i = 0; i < elen; i++) {
+        char fc = filename[flen - elen + i];
+        char ec = ext[i];
+        // case-insensitive
+        if (fc >= 'A' && fc <= 'Z') fc += 32;
+        if (ec >= 'A' && ec <= 'Z') ec += 32;
+        if (fc != ec) return 0;
+    }
+    return 1;
+}
+
+static int load_map_terrain_from_scenario(const char *filename)
+{
+    // Clear everything first (same as loading a fresh scenario)
+    clear_battlefield_data();
+
+    // Load scenario file — populates terrain grids, scenario settings (map dimensions, climate, etc.)
+    if (!game_file_io_read_scenario(filename)) {
+        return 0;
+    }
+
+    // Rebuild terrain tile images (same sequence as initialize_scenario_data in file.c)
+    scenario_map_init();
+    map_tiles_update_all_elevation();
+    map_tiles_update_all_water();
+    map_tiles_update_all_earthquake();
+    map_tiles_update_all_rocks();
+    map_tiles_update_all_empty_land();
+    map_tiles_update_all_meadow();
+    map_tiles_update_all_rubble();
+    map_tiles_update_all_roads();
+    map_tiles_update_all_highways();
+    map_tiles_update_all_plazas();
+    map_tiles_update_all_walls();
+    map_tiles_update_all_aqueducts(0);
+
+    image_load_climate(scenario_property_climate(), 0, 0, 0);
+    map_routing_update_all();
+
+    scenario_map_init_entry_exit();
+    map_point entry = scenario_map_entry();
+    map_point exit = scenario_map_exit();
+    city_map_set_entry_point(entry.x, entry.y);
+    city_map_set_exit_point(exit.x, exit.y);
+
+    return 1;
+}
+
+static int load_map_terrain_from_savegame(const char *filename)
+{
+    // Load the full saved game (terrain + everything)
+    if (game_file_load_saved_game(filename) != 1) {
+        return 0;
+    }
+
+    // Strip buildings, figures, formations — keep terrain
+    building_clear_all();
+    building_storage_clear_all();
+    figure_init_scenario();
+    enemy_armies_clear();
+    figure_name_init();
+    formations_clear();
+    building_monument_initialize_deliveries();
+    figure_route_clear_all();
+    figure_visited_buildings_init();
+
+    map_building_clear();
+    map_figure_clear();
+    map_sprite_clear();
+    map_soldier_strength_clear();
+
+    // Rebuild map images over existing terrain
+    map_image_clear();
+    map_image_update_all();
+    map_routing_update_all();
+
+    return 1;
+}
+
+void battlefield_start_from_map(const char *filename, const battlefield_config *config)
+{
+    if (!filename || strlen(filename) == 0) {
+        terminal_add_line("[error] No filename provided.");
+        return;
+    }
+
+    battlefield_config cfg;
+    if (config) {
+        cfg = *config;
+    } else {
+        cfg = default_config();
+    }
+
+    terminal_add_line("[battlefield] Starting battlefield from map...");
+
+    // Save backup first
+    save_backup();
+
+    int loaded = 0;
+
+    if (has_extension(filename, ".map") || has_extension(filename, ".mapx")) {
+        loaded = load_map_terrain_from_scenario(filename);
+    } else if (has_extension(filename, ".svx") || has_extension(filename, ".sav")) {
+        loaded = load_map_terrain_from_savegame(filename);
+    } else {
+        // Try savegame first, then scenario
+        loaded = load_map_terrain_from_savegame(filename);
+        if (!loaded) {
+            loaded = load_map_terrain_from_scenario(filename);
+        }
+    }
+
+    if (!loaded) {
+        terminal_add_line("[error] Failed to load map file.");
+        // Restore backup if we have one
+        if (has_backup) {
+            has_backup = 0;
+            const char *restore_path = dir_append_location(BACKUP_FILENAME, PATH_LOCATION_SAVEGAME);
+            game_file_load_saved_game(restore_path);
+        }
+        return;
+    }
+
+    // Set enemy graphics
+    scenario.enemy_id = cfg.enemy_id;
+    image_load_enemy(cfg.enemy_id);
+
+    // Spawn player armies
+    for (int i = 0; i < cfg.player_army_count && i < BATTLEFIELD_MAX_ARMIES; i++) {
+        spawn_player_legion(&cfg.player_armies[i]);
+    }
+
+    // Spawn enemy armies
+    for (int i = 0; i < cfg.enemy_army_count && i < BATTLEFIELD_MAX_ARMIES; i++) {
+        spawn_enemy_formation(&cfg.enemy_armies[i], cfg.enemy_id);
+    }
+
+    // Link figures to formations
+    formation_calculate_figures();
+
+    // Activate
+    is_active = 1;
+    city_view_init();
+    game_state_unpause();
+    window_city_show();
+
+    terminal_add_line("[battlefield] Battlefield active (loaded from map).");
 }

@@ -142,6 +142,16 @@ void terminal_submit(void)
         data.cursor_pos = 0;
         return;
     }
+    if (strncmp(data.input, "battlefield ", 12) == 0) {
+        const char *filepath = data.input + 12;
+        // Skip leading whitespace
+        while (*filepath == ' ') filepath++;
+        battlefield_start_from_map(filepath, 0);
+        data.input[0] = '\0';
+        data.input_len = 0;
+        data.cursor_pos = 0;
+        return;
+    }
 
     execute_lua(data.input);
     data.input[0] = '\0';

@@ -86,6 +86,33 @@ function game.api_version() end
 ---@param config? battlefield_config
 function game.battlefield_start(config) end
 
+--- Start a battlefield battle using an existing map file as terrain.
+--- Loads the specified file (.svx, .sav, .map, or .mapx), strips all buildings
+--- and figures, keeps the terrain, and spawns battlefield armies.
+--- The previous scenario is saved and will be restored when the battle ends.
+---
+--- Pass an optional config table (same format as battlefield_start) to customize armies.
+--- If omitted, default armies are used.
+---
+--- ```lua
+--- -- With defaults:
+--- game.battlefield_start_from_map("path/to/map.svx")
+---
+--- -- With custom config:
+--- game.battlefield_start_from_map("path/to/map.svx", {
+---     enemy_id = game.ENEMY_TYPE.GAUL,
+---     player_armies = {
+---         { figure_type = game.FIGURE_TYPE.LEGIONARY, count = 2, soldiers = 16, x = 20, y = 30 },
+---     },
+---     enemy_armies = {
+---         { figure_type = game.FIGURE_TYPE.ENEMY_FAST_SWORD, count = 3, soldiers = 16, x = 60, y = 30 },
+---     },
+--- })
+--- ```
+---@param filename string Path to the map file to load
+---@param config? battlefield_config Optional army configuration
+function game.battlefield_start_from_map(filename, config) end
+
 --- Stop an active battlefield and restore the previously saved scenario.
 function game.battlefield_stop() end
 
@@ -100,39 +127,39 @@ function game.battlefield_is_active() end
 --- Player figure type constants for battlefield armies
 ---@class game_FIGURE_TYPE
 game.FIGURE_TYPE = {
-    LEGIONARY  = 13,  -- FIGURE_FORT_LEGIONARY
-    JAVELIN    = 11,  -- FIGURE_FORT_JAVELIN
-    MOUNTED    = 12,  -- FIGURE_FORT_MOUNTED
-    INFANTRY   = 92,  -- FIGURE_FORT_INFANTRY
-    ARCHER     = 94,  -- FIGURE_FORT_ARCHER
+    LEGIONARY            = 13,  -- FIGURE_FORT_LEGIONARY
+    JAVELIN              = 11,  -- FIGURE_FORT_JAVELIN
+    MOUNTED              = 12,  -- FIGURE_FORT_MOUNTED
+    INFANTRY             = 92,  -- FIGURE_FORT_INFANTRY
+    ARCHER               = 94,  -- FIGURE_FORT_ARCHER
     -- Enemy figure types
-    ENEMY_SPEAR           = 43,  -- FIGURE_ENEMY43_SPEAR
-    ENEMY_SWORD           = 44,  -- FIGURE_ENEMY44_SWORD
-    ENEMY_SWORD_2         = 45,  -- FIGURE_ENEMY45_SWORD
-    ENEMY_CAMEL           = 46,  -- FIGURE_ENEMY46_CAMEL
-    ENEMY_ELEPHANT        = 47,  -- FIGURE_ENEMY47_ELEPHANT
-    ENEMY_CHARIOT         = 48,  -- FIGURE_ENEMY48_CHARIOT
-    ENEMY_FAST_SWORD      = 49,  -- FIGURE_ENEMY49_FAST_SWORD
-    ENEMY_SWORD_3         = 50,  -- FIGURE_ENEMY50_SWORD
-    ENEMY_SPEAR_2         = 51,  -- FIGURE_ENEMY51_SPEAR
-    ENEMY_MOUNTED_ARCHER  = 52,  -- FIGURE_ENEMY52_MOUNTED_ARCHER
-    ENEMY_AXE             = 53,  -- FIGURE_ENEMY53_AXE
-    ENEMY_GLADIATOR       = 54,  -- FIGURE_ENEMY54_GLADIATOR
+    ENEMY_SPEAR          = 43,  -- FIGURE_ENEMY43_SPEAR
+    ENEMY_SWORD          = 44,  -- FIGURE_ENEMY44_SWORD
+    ENEMY_SWORD_2        = 45,  -- FIGURE_ENEMY45_SWORD
+    ENEMY_CAMEL          = 46,  -- FIGURE_ENEMY46_CAMEL
+    ENEMY_ELEPHANT       = 47,  -- FIGURE_ENEMY47_ELEPHANT
+    ENEMY_CHARIOT        = 48,  -- FIGURE_ENEMY48_CHARIOT
+    ENEMY_FAST_SWORD     = 49,  -- FIGURE_ENEMY49_FAST_SWORD
+    ENEMY_SWORD_3        = 50,  -- FIGURE_ENEMY50_SWORD
+    ENEMY_SPEAR_2        = 51,  -- FIGURE_ENEMY51_SPEAR
+    ENEMY_MOUNTED_ARCHER = 52,  -- FIGURE_ENEMY52_MOUNTED_ARCHER
+    ENEMY_AXE            = 53,  -- FIGURE_ENEMY53_AXE
+    ENEMY_GLADIATOR      = 54,  -- FIGURE_ENEMY54_GLADIATOR
 }
 
 --- Enemy graphics set constants (controls which enemy sprite sheet is loaded)
 ---@class game_ENEMY_TYPE
 game.ENEMY_TYPE = {
-    BARBARIAN     = 0,
-    NUMIDIAN      = 1,
-    GAUL          = 2,
-    CELT          = 3,
-    GOTH          = 4,
-    PERGAMUM      = 5,
-    SELEUCID      = 6,
-    ETRUSCAN      = 7,
-    GREEK         = 8,
-    EGYPTIAN      = 9,
-    CARTHAGINIAN  = 10,
-    CAESAR        = 11,
+    BARBARIAN    = 0,
+    NUMIDIAN     = 1,
+    GAUL         = 2,
+    CELT         = 3,
+    GOTH         = 4,
+    PERGAMUM     = 5,
+    SELEUCID     = 6,
+    ETRUSCAN     = 7,
+    GREEK        = 8,
+    EGYPTIAN     = 9,
+    CARTHAGINIAN = 10,
+    CAESAR       = 11,
 }
