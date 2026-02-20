@@ -112,6 +112,56 @@ function battlefield.win() end
 function battlefield.lose() end
 
 ----------------------------------------------------------------
+-- Battlefield queries
+----------------------------------------------------------------
+
+--- Count alive enemy figures on the map.
+--- If figure_type is given, only counts enemies of that specific type.
+--- If omitted or nil, counts all enemy figures.
+---
+--- ```lua
+--- local total = battlefield.enemy_count()
+--- local swords = battlefield.enemy_count(battlefield.FIGURE_TYPE.ENEMY_FAST_SWORD)
+--- if total == 0 then battlefield.win() end
+--- ```
+---@param figure_type? integer Optional figure type filter (see battlefield.FIGURE_TYPE.*)
+---@return integer count Number of alive enemy figures
+function battlefield.enemy_count(figure_type) end
+
+--- Count alive player (legion) figures on the map.
+--- If figure_type is given, only counts soldiers of that specific type.
+--- If omitted or nil, counts all player soldiers.
+---
+--- ```lua
+--- local total = battlefield.player_count()
+--- local legionaries = battlefield.player_count(battlefield.FIGURE_TYPE.LEGIONARY)
+--- if total == 0 then battlefield.lose() end
+--- ```
+---@param figure_type? integer Optional figure type filter (see battlefield.FIGURE_TYPE.*)
+---@return integer count Number of alive player figures
+function battlefield.player_count(figure_type) end
+
+--- Count active enemy formations (groups with at least one alive figure).
+--- If figure_type is given, only counts formations of that specific type.
+---
+--- ```lua
+--- local formations = battlefield.enemy_formation_count()
+--- ```
+---@param figure_type? integer Optional figure type filter
+---@return integer count Number of active enemy formations
+function battlefield.enemy_formation_count(figure_type) end
+
+--- Count active player (legion) formations (groups with at least one alive figure).
+--- If figure_type is given, only counts formations of that specific type.
+---
+--- ```lua
+--- local formations = battlefield.player_formation_count()
+--- ```
+---@param figure_type? integer Optional figure type filter
+---@return integer count Number of active player formations
+function battlefield.player_formation_count(figure_type) end
+
+----------------------------------------------------------------
 -- Battlefield constants
 ----------------------------------------------------------------
 

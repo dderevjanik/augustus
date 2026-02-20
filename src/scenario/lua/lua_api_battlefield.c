@@ -1,6 +1,8 @@
 #include "lua/lua.h"
 #include "lua/lauxlib.h"
 
+#include "figure/figure.h"
+#include "figure/formation.h"
 #include "figure/type.h"
 #include "game/battlefield.h"
 #include "scenario/lua/lua_state.h"
@@ -261,14 +263,100 @@ static int l_battlefield_lose(lua_State *L)
     return 0;
 }
 
+// battlefield.enemy_count(figure_type?) -> integer
+// Count alive enemy figures on the map. If figure_type is given, only count that type.
+static int l_battlefield_enemy_count(lua_State *L)
+{
+    int filter_type = -1;
+    if (lua_gettop(L) >= 1 && !lua_isnil(L, 1)) {
+        filter_type = (int) luaL_checkinteger(L, 1);
+    }
+    int count = 0;
+    for (unsigned int i = 1; i < figure_count(); i++) {
+        figure *f = figure_get(i);
+        if (figure_is_dead(f)) continue;
+        if (!figure_is_enemy(f)) continue;
+        if (filter_type >= 0 && f->type != filter_type) continue;
+        count++;
+    }
+    lua_pushinteger(L, count);
+    return 1;
+}
+
+// battlefield.player_count(figure_type?) -> integer
+// Count alive player (legion) figures on the map. If figure_type is given, only count that type.
+static int l_battlefield_player_count(lua_State *L)
+{
+    int filter_type = -1;
+    if (lua_gettop(L) >= 1 && !lua_isnil(L, 1)) {
+        filter_type = (int) luaL_checkinteger(L, 1);
+    }
+    int count = 0;
+    for (unsigned int i = 1; i < figure_count(); i++) {
+        figure *f = figure_get(i);
+        if (figure_is_dead(f)) continue;
+        if (!figure_is_legion(f)) continue;
+        if (filter_type >= 0 && f->type != filter_type) continue;
+        count++;
+    }
+    lua_pushinteger(L, count);
+    return 1;
+}
+
+// battlefield.enemy_formation_count(figure_type?) -> integer
+// Count active enemy formations. If figure_type is given, only count formations of that type.
+static int l_battlefield_enemy_formation_count(lua_State *L)
+{
+    int filter_type = -1;
+    if (lua_gettop(L) >= 1 && !lua_isnil(L, 1)) {
+        filter_type = (int) luaL_checkinteger(L, 1);
+    }
+    int count = 0;
+    for (int i = 1; i < formation_count(); i++) {
+        formation *m = formation_get(i);
+        if (!m->in_use) continue;
+        if (m->is_legion || m->is_herd) continue;
+        if (m->num_figures <= 0) continue;
+        if (filter_type >= 0 && m->figure_type != filter_type) continue;
+        count++;
+    }
+    lua_pushinteger(L, count);
+    return 1;
+}
+
+// battlefield.player_formation_count(figure_type?) -> integer
+// Count active player (legion) formations. If figure_type is given, only count formations of that type.
+static int l_battlefield_player_formation_count(lua_State *L)
+{
+    int filter_type = -1;
+    if (lua_gettop(L) >= 1 && !lua_isnil(L, 1)) {
+        filter_type = (int) luaL_checkinteger(L, 1);
+    }
+    int count = 0;
+    for (int i = 1; i < formation_count(); i++) {
+        formation *m = formation_get(i);
+        if (!m->in_use) continue;
+        if (!m->is_legion) continue;
+        if (m->num_figures <= 0) continue;
+        if (filter_type >= 0 && m->figure_type != filter_type) continue;
+        count++;
+    }
+    lua_pushinteger(L, count);
+    return 1;
+}
+
 static const luaL_Reg battlefield_funcs[] = {
     {"start",           l_battlefield_start},
     {"start_from_map",  l_battlefield_start_from_map},
     {"stop",            l_battlefield_stop},
     {"is_active",       l_battlefield_is_active},
     {"spawn_enemies",   l_battlefield_spawn_enemies},
-    {"win",             l_battlefield_win},
-    {"lose",            l_battlefield_lose},
+    {"win",                      l_battlefield_win},
+    {"lose",                     l_battlefield_lose},
+    {"enemy_count",              l_battlefield_enemy_count},
+    {"player_count",             l_battlefield_player_count},
+    {"enemy_formation_count",    l_battlefield_enemy_formation_count},
+    {"player_formation_count",   l_battlefield_player_formation_count},
     {NULL, NULL}
 };
 
