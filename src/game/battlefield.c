@@ -49,6 +49,7 @@
 #include "scenario/lua/lua_state.h"
 #include "sound/city.h"
 #include "window/city.h"
+#include "window/main_menu.h"
 
 #include <string.h>
 
@@ -104,6 +105,7 @@ void battlefield_stop(void)
     }
     // Shut down any battlefield Lua state before restoring
     scenario_lua_shutdown();
+    int had_backup = has_backup;
     if (has_backup) {
         has_backup = 0;
         terminal_add_line("[battlefield] Restoring previous scenario...");
@@ -121,6 +123,11 @@ void battlefield_stop(void)
     }
     original_lua_source[0] = '\0';
     battlefield_lua_source[0] = '\0';
+
+    if (!had_backup) {
+        // No scenario to restore (e.g. battlefield started from main menu)
+        window_main_menu_show(1);
+    }
 }
 
 int battlefield_should_stop(void)
@@ -144,13 +151,9 @@ void battlefield_process_pending_lua(void)
 
 void battlefield_check_completion(void)
 {
-    if (!is_active) {
-        return;
-    }
-    if (enemy_army_total_enemy_formations() <= 0) {
-        terminal_add_line("[battlefield] Victory! All enemies defeated.");
-        pending_stop = 1; // win
-    }
+    // No automatic victory/defeat — win/lose is controlled entirely by the Lua script.
+    // The map designer decides objectives (e.g. destroy all enemies, capture a point,
+    // survive waves, etc.) and calls battlefield.win() or battlefield.lose() explicitly.
 }
 
 void battlefield_win(void)
