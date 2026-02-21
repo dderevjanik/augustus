@@ -253,6 +253,7 @@ static int is_builtin_global(const char *name)
         // API modules
         "game", "city", "finance", "scenario", "map", "ui",
         "building", "resource", "population", "sound", "empire",
+        "battlefield",
         // Standard library
         "_G", "_VERSION", "assert", "collectgarbage", "error", "getmetatable",
         "ipairs", "load", "next", "pairs", "pcall", "print", "rawequal",
@@ -350,7 +351,7 @@ static void serialize_value(lua_State *L, int index, buffer *buf, int depth)
 void scenario_lua_save_state(buffer *buf)
 {
     // Use a temporary buffer to serialize, since we don't know size upfront
-    #define LUA_SAVE_TEMP_SIZE (MAX_LUA_SCRIPT_SIZE + 65536)
+#define LUA_SAVE_TEMP_SIZE (MAX_LUA_SCRIPT_SIZE + 65536)
     uint8_t *temp_data = malloc(LUA_SAVE_TEMP_SIZE);
     if (!temp_data) {
         log_error("Failed to allocate Lua save buffer", 0, 0);
@@ -452,21 +453,21 @@ static int deserialize_value(lua_State *L, buffer *buf, int depth)
             lua_pushboolean(L, buffer_read_u8(buf));
             break;
         case LUA_SAVE_TYPE_NUMBER:
-            {
-                double num;
-                buffer_read_raw(buf, &num, sizeof(double));
-                lua_pushnumber(L, num);
-            }
-            break;
+        {
+            double num;
+            buffer_read_raw(buf, &num, sizeof(double));
+            lua_pushnumber(L, num);
+        }
+        break;
         case LUA_SAVE_TYPE_STRING:
-            {
-                uint16_t len = buffer_read_u16(buf);
-                char str_buf[0x10000];
-                buffer_read_raw(buf, str_buf, len);
-                str_buf[len] = '\0';
-                lua_pushstring(L, str_buf);
-            }
-            break;
+        {
+            uint16_t len = buffer_read_u16(buf);
+            char str_buf[0x10000];
+            buffer_read_raw(buf, str_buf, len);
+            str_buf[len] = '\0';
+            lua_pushstring(L, str_buf);
+        }
+        break;
         case LUA_SAVE_TYPE_TABLE:
             if (!deserialize_table(L, buf, depth + 1)) {
                 return 0;
