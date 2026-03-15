@@ -1917,7 +1917,24 @@ static translation_string all_strings[] = {
     {TR_ACTION_TYPE_LOCK_TRADE_ROUTE, "Lock Trade route"},
     {TR_PARAMETER_LOCK, "Lock"},
     {TR_PARAMETER_UNLOCK, "Unlock"},
-    {TR_PARAMETER_TERRAIN_RUBBLE, "Rubble"}
+    {TR_PARAMETER_TERRAIN_RUBBLE, "Rubble"},
+    {TR_EDITOR_RANDOM_MAP_TITLE, "Random Map Generator"},
+    {TR_EDITOR_RANDOM_MAP_SEED, "Seed"},
+    {TR_EDITOR_RANDOM_MAP_MAP_SIZE, "Map size"},
+    {TR_EDITOR_RANDOM_MAP_TREE_DENSITY, "Tree density"},
+    {TR_EDITOR_RANDOM_MAP_ROCK_DENSITY, "Rock density"},
+    {TR_EDITOR_RANDOM_MAP_SHRUB_DENSITY, "Shrub density"},
+    {TR_EDITOR_RANDOM_MAP_MEADOW_DENSITY, "Meadow density"},
+    {TR_EDITOR_RANDOM_MAP_LAKE_COUNT, "Lakes"},
+    {TR_EDITOR_RANDOM_MAP_LAKE_SIZE, "Lake size"},
+    {TR_EDITOR_RANDOM_MAP_RIVER_COUNT, "Rivers"},
+    {TR_EDITOR_RANDOM_MAP_COASTAL, "Coastal"},
+    {TR_EDITOR_RANDOM_MAP_ELEVATION, "Elevation"},
+    {TR_EDITOR_RANDOM_MAP_MAX_ELEVATION, "Max elevation"},
+    {TR_EDITOR_RANDOM_MAP_FLATNESS, "Flatness"},
+    {TR_EDITOR_RANDOM_MAP_GENERATE, "Generate"},
+    {TR_EDITOR_RANDOM_MAP_CANCEL, "Cancel"},
+    {TR_EDITOR_RANDOM_MAP_MENU, "Random Map"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

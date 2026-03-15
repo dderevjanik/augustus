@@ -26,10 +26,12 @@
 #include "window/select_list.h"
 #include "window/editor/empire.h"
 #include "window/editor/map.h"
+#include "window/editor/random_map.h"
 
 void menu_file_new_map(int param);
 static void menu_file_load_map(int param);
 static void menu_file_save_map(int param);
+static void menu_file_random_map(int param);
 static void menu_file_exit_to_menu(int param);
 static void menu_file_exit_game(int param);
 
@@ -49,6 +51,7 @@ static void menu_empire_custom(int param);
 
 static menu_item menu_file[] = {
     {7, 1, menu_file_new_map, 0},
+    {CUSTOM_TRANSLATION, TR_EDITOR_RANDOM_MAP_MENU, menu_file_random_map, 0},
     {7, 2, menu_file_load_map, 0},
     {7, 3, menu_file_save_map, 0},
     {CUSTOM_TRANSLATION, TR_BUTTON_BACK_TO_MAIN_MENU, menu_file_exit_to_menu, 0},
@@ -78,7 +81,7 @@ static menu_item menu_empire[] = {
 };
 
 static menu_bar_item menu[] = {
-    {7, menu_file, 5},
+    {7, menu_file, 6},
     {2, menu_options, 3},
     {3, menu_help, 2},
     {10, menu_resets, 3},
@@ -237,6 +240,12 @@ void menu_file_new_map(int centered)
         y += 200;
     }
     window_select_list_show(x, y, 0, 33, 7, map_size_selected);
+}
+
+static void menu_file_random_map(int param)
+{
+    clear_state();
+    window_editor_random_map_show();
 }
 
 static void menu_file_load_map(int param)

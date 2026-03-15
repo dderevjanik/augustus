@@ -682,6 +682,7 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/editor/start_year.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/starting_conditions.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/win_criteria.c
+    ${PROJECT_SOURCE_DIR}/src/window/editor/random_map.c
     ${PROJECT_SOURCE_DIR}/src/window/cck_selection.c
     ${PROJECT_SOURCE_DIR}/src/window/city.c
     ${PROJECT_SOURCE_DIR}/src/window/config.c
@@ -723,6 +724,11 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/user_path_setup.c
     ${PROJECT_SOURCE_DIR}/src/window/victory_dialog.c
     ${PROJECT_SOURCE_DIR}/src/window/video.c
+)
+set(MAPGEN_FILES
+    ${PROJECT_SOURCE_DIR}/src/mapgen/mapgen.c
+    ${PROJECT_SOURCE_DIR}/src/mapgen/mapgen_noise.c
+    ${PROJECT_SOURCE_DIR}/src/mapgen/mapgen_random.c
 )
 set(EDITOR_FILES
     ${PROJECT_SOURCE_DIR}/src/editor/editor.c
@@ -809,6 +815,7 @@ set(SOURCE_FILES
     ${WIDGET_FILES}
     ${WINDOW_FILES}
     ${EDITOR_FILES}
+    ${MAPGEN_FILES}
     ${TRANSLATION_FILES}
     ${TINYFD_FILES}
     ${SPNG_FILES}
