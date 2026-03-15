@@ -27,6 +27,11 @@
 #include "window/editor/empire.h"
 #include "window/editor/map.h"
 
+#include "core/lang.h"
+#include "core/string.h"
+
+#include <stdio.h>
+
 void menu_file_new_map(int param);
 static void menu_file_load_map(int param);
 static void menu_file_save_map(int param);
@@ -228,6 +233,13 @@ static void map_size_selected(int size)
     }
 }
 
+static const int MAP_SIZE_DIMENSIONS[] = { 40, 60, 80, 100, 120, 160 };
+#define NUM_MAP_SIZES 6
+#define MAP_SIZE_LABEL_LENGTH 64
+
+static uint8_t map_size_labels[NUM_MAP_SIZES + 1][MAP_SIZE_LABEL_LENGTH];
+static const uint8_t *map_size_label_ptrs[NUM_MAP_SIZES + 1];
+
 void menu_file_new_map(int centered)
 {
     int x = 50;
@@ -236,7 +248,19 @@ void menu_file_new_map(int centered)
         x += 325;
         y += 200;
     }
-    window_select_list_show(x, y, 0, 33, 7, map_size_selected);
+    for (int i = 0; i < NUM_MAP_SIZES; i++) {
+        const uint8_t *name = lang_get_string(33, i);
+        uint8_t *dst = string_copy(name, map_size_labels[i], MAP_SIZE_LABEL_LENGTH - 1);
+        char suffix[32];
+        snprintf(suffix, sizeof(suffix), " (%dx%d)", MAP_SIZE_DIMENSIONS[i], MAP_SIZE_DIMENSIONS[i]);
+        string_copy(string_from_ascii(suffix), dst, MAP_SIZE_LABEL_LENGTH - (dst - map_size_labels[i]) - 1);
+        map_size_label_ptrs[i] = map_size_labels[i];
+    }
+    // Cancel option
+    string_copy(lang_get_string(33, 6), map_size_labels[NUM_MAP_SIZES], MAP_SIZE_LABEL_LENGTH - 1);
+    map_size_label_ptrs[NUM_MAP_SIZES] = map_size_labels[NUM_MAP_SIZES];
+
+    window_select_list_show_text(x, y, 0, map_size_label_ptrs, NUM_MAP_SIZES + 1, map_size_selected);
 }
 
 static void menu_file_load_map(int param)

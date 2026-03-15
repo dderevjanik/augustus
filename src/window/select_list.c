@@ -10,7 +10,7 @@
 #include "input/input.h"
 
 #define MAX_ITEMS_PER_LIST 20
-#define BASE_LIST_WIDTH 200
+#define BASE_LIST_WIDTH 220
 #define MAX_LIST_WIDTH 496
 
 enum {
@@ -168,12 +168,8 @@ static void draw_item(int item_id, int x, int y, int selected)
         lang_text_draw_centered_colored(data.group, item_id, data.x + x, data.y + y, data.width,
             FONT_NORMAL_PLAIN, color);
     } else {
-        if (data.width == BASE_LIST_WIDTH) {
-            text_draw_centered(data.items[item_id], data.x + x, data.y + y, BASE_LIST_WIDTH, FONT_NORMAL_PLAIN, color);
-        } else {
-            text_draw_ellipsized(data.items[item_id], data.x + x + 5, data.y + y,
-                data.width - 10, FONT_NORMAL_PLAIN, color);
-        }
+        text_draw_ellipsized(data.items[item_id], data.x + x + 5, data.y + y,
+            data.width - 10, FONT_NORMAL_PLAIN, color);
     }
 }
 
